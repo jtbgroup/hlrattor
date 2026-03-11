@@ -1,0 +1,35 @@
+services:
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-hlrattor}
+      POSTGRES_USER: ${POSTGRES_USER:-hlrattor}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hlrattor}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hlrattor}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-hlrattor}
+      DB_USERNAME: ${POSTGRES_USER:-hlrattor}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-hlrattor}
+      SERVER_PORT: 8081
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pg_data:
