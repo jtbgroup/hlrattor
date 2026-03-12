@@ -4,8 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProductGenApplication {
+public class HlrattorApplication {
     public static void main(String[] args) {
-        SpringApplication.run(ProductGenApplication.class, args);
+        SpringApplication.run(HlrattorApplication.class, args);
     }
 }
