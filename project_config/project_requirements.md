@@ -43,8 +43,6 @@ at the root level, you'll find:
 
 Contains not only the code of the frontend but also the frontend automated tests located in a **e2e** folder.
 
-All the angular components must be split into 3 files: .ts, .html and .scss in order to have a better comprehension of each component. The scss must be as much centralized as possible. The layout must be easily maintainable.
-
 ## backend
 
 Contains the code of the backend including the Flyway files. 

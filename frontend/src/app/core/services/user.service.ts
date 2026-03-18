@@ -6,19 +6,19 @@ import { environment } from '../../../environments/environment';
 export interface UserManagementDto {
   id: string;
   username: string;
-  role: 'ADMIN' | 'PROJECT_MANAGER';
+  roles: string[];
   enabled: boolean;
 }
 
 export interface CreateUserDto {
   username: string;
   password: string;
-  role: 'ADMIN' | 'PROJECT_MANAGER';
+  roles: string[];
   enabled?: boolean;
 }
 
 export interface UpdateUserDto {
-  role?: 'ADMIN' | 'PROJECT_MANAGER';
+  roles?: string[];
   enabled?: boolean;
 }
 

@@ -18,6 +18,7 @@ This prompt is used to generate all the code and resources required to implement
 - User management actions must be audited (who performed the action + timestamp).
 - All user management endpoints must be secured: only ADMIN can perform create/edit/disable, and users can only change their own password.
 - Disabling a user must prevent further authentication and invalidate existing sessions.
+- **A user can hold multiple roles simultaneously.** Roles are stored in a dedicated join table `app_user_roles`.
 
 ---
 
@@ -25,108 +26,134 @@ This prompt is used to generate all the code and resources required to implement
 
 ### 1. Backend
 
-#### Entity & Repository
+#### Entity
 
-- Ensure `AppUser` entity (existing from UC-01) includes:
-  - `enabled` boolean flag (true by default)
-  - Optional fields: `firstName`, `lastName`, `email` (if not already present)
+- `AppUser` entity with fields: `id` (UUID), `username` (unique), `password` (hashed), `enabled` (boolean).
+- Roles stored as `@ElementCollection(fetch = EAGER)` in join table `app_user_roles (user_id, role)`.
+- `roles` field type: `Set<Role>` (enum: `ADMIN`, `PROJECT_MANAGER`).
+- Helper method: `boolean hasRole(Role role)`.
 
-- `AppUserRepository` already exists; add methods if needed (e.g., `Optional<AppUser> findByUsername(String username)`).
+#### Repository
+
+- `AppUserRepository` extending `JpaRepository`.
+- Method: `Optional<AppUser> findByUsername(String username)`.
 
 #### User Management API
 
-Create a controller and service to expose the following endpoints under `/api/users`:
+Endpoints under `/api/users`:
 
-- `GET /api/users` (ADMIN only): list all users.
+- `GET /api/users` (ADMIN only): list all users. Response includes `roles: List<String>`.
 - `POST /api/users` (ADMIN only): create a new user.
-  - Request body: `{ username, password, role, enabled }` (password required, role required, enabled optional)
-  - Validate username uniqueness.
-  - Hash password (BCrypt 12).
-  - Audit creation (who, when).
+  - Request body: `{ username, password, roles: List<String>, enabled? }`
+  - Validate username uniqueness, at least one role provided.
+  - Hash password (BCrypt 12). Audit creation.
+- `PUT /api/users/{id}` (ADMIN only): update `roles` and/or `enabled` flag.
+  - Validate at least one role provided.
+  - Prevent self-disable. Audit update.
+- `POST /api/users/{id}/disable` (ADMIN only): set `enabled=false`, invalidate sessions. Audit.
+- `POST /api/users/me/password` (authenticated): change own password.
+  - Body: `{ currentPassword, newPassword, confirmPassword }`.
 
-- `PUT /api/users/{id}` (ADMIN only): update user metadata (role, enabled flag, name/email).
-  - Do not allow updating password via this endpoint.
-  - Prevent disabling the currently logged-in admin (self-disable) if it would lock out all admins.
-  - Audit update.
+#### DTOs
 
-- `POST /api/users/{id}/disable` (ADMIN only): disable a user (set enabled=false and invalidate active sessions).
-  - Ensure a user cannot disable themself (or at least not the last remaining ADMIN).
-  - Audit action.
+```java
+// UserDtos.java
+record UserResponse(UUID id, String username, List<String> roles, boolean enabled) {}
+record CreateUserRequest(String username, String password, List<String> roles, Boolean enabled) {}
+record UpdateUserRequest(List<String> roles, Boolean enabled) {}
+record ChangePasswordRequest(String currentPassword, String newPassword, String confirmPassword) {}
 
-- `POST /api/users/me/password` (authenticated user): change own password.
-  - Request body: `{ currentPassword, newPassword, confirmPassword }`.
-  - Validate current password matches.
-  - Validate new password rules and confirmation.
-  - Hash password (BCrypt 12) and persist.
-  - Optionally require re-login.
-
-#### Service Layer
-
-- Add a `UserManagementService` (or enhance existing service) to encapsulate business rules:
-  - Username uniqueness check.
-  - Role validation.
-  - Self-disable prevention logic.
-  - Session invalidation upon disable.
+// AuthDtos.java
+record UserResponse(String username, List<String> roles) {}
+```
 
 #### Security
 
-- Extend existing security configuration to:
-  - Protect `/api/users/**` endpoints, allowing only ADMIN.
-  - Protect `/api/users/me/password` for authenticated users.
-  - Return proper HTTP status codes (401/403).
+- `AppUserDetailsService`: maps all roles in `app_user_roles` to Spring Security `GrantedAuthority` as `ROLE_<ROLE_NAME>`.
+- `SecurityFilterChain`: protect `/api/users/**` with `hasRole("ADMIN")`; protect `/api/users/me/password` with `isAuthenticated()`.
+
+#### Auth Controller
+
+- `POST /api/auth/login` and `GET /api/auth/me`: return `{ username, roles: List<String> }`.
 
 #### Flyway Migration
 
-- Add a new migration file: `V2__UC-02-user-management.sql`.
-- Include header comment: `-- Use case: UC-02`.
-- If the `app_user` table already exists, update it to ensure it contains `enabled` and any added fields (e.g., `first_name`, `last_name`, `email`).
+- File: `V2__UC-02-user-management.sql`
+- SQL header comment: `-- Use case: UC-02`
+- Creates `user_audit` table.
+- Creates `app_user_roles (user_id UUID FK, role VARCHAR(50))` join table with composite PK.
+- Migrates existing `role` column data from `app_user` into `app_user_roles`.
+- Drops `role` column from `app_user`.
+
+```sql
+-- Use case: UC-02
+
+CREATE TABLE IF NOT EXISTS user_audit (
+    id           UUID         PRIMARY KEY,
+    action       TEXT         NOT NULL,
+    performed_by VARCHAR(100) NOT NULL,
+    target_user  VARCHAR(100) NOT NULL,
+    performed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    details      TEXT
+);
+
+CREATE TABLE app_user_roles (
+    user_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+    role    VARCHAR(50) NOT NULL,
+    PRIMARY KEY (user_id, role)
+);
+
+INSERT INTO app_user_roles (user_id, role)
+SELECT id, role FROM app_user;
+
+ALTER TABLE app_user DROP COLUMN role;
+```
 
 ---
 
 ### 2. Frontend
 
-#### User Management Feature Module
+#### User Management Feature
 
-Create a lazy-loaded feature module at route `/users`.
+Lazy-loaded at `/admin/users` (ADMIN only via `adminGuard`).
 
 ##### User List Page
 
-- Displays a table of users with columns: username, role, status (enabled/disabled), actions.
+- Table columns: `username`, `roles` (chips), `status`, `actions`.
 - Actions: Edit, Disable.
-- Only visible to ADMIN.
 
-##### Create/Edit User Dialogs
+##### Create/Edit Form
 
-- Provide a dialog/form to create or edit a user.
-- Fields: username, role (select), enabled (toggle), password (create only).
-- Frontend validation: required fields, password rules, password confirmation.
+- Fields: `username` (readonly on edit), `password` (create only), `roles` (**multi-select**, at least one required), `enabled` (toggle).
+- Form is invalid if `roles` is empty.
 
-##### Disable User
+#### Auth Service
 
-- Prompt confirmation before disabling.
-- On success, refresh user list.
+```typescript
+export interface CurrentUser {
+  username: string;
+  roles: string[];
+}
+// Method: hasRole(role: string): boolean
+```
 
-#### Change Password Page
+#### User Service DTOs
 
-Create a page (route `/me/change-password`) for authenticated users to change their password.
+```typescript
+interface UserManagementDto { id: string; username: string; roles: string[]; enabled: boolean; }
+interface CreateUserDto { username: string; password: string; roles: string[]; enabled?: boolean; }
+interface UpdateUserDto { roles?: string[]; enabled?: boolean; }
+```
 
-- Form fields: current password, new password, confirm new password.
-- Validate matching and password rules.
-- Call backend endpoint and show feedback.
+#### Admin Guard
 
-#### Services & Store
+```typescript
+// Uses authService.hasRole('ADMIN') instead of role === 'ADMIN'
+```
 
-- Extend `AuthService` (or create `UserService`) with methods:
-  - `getUsers()` - calls `GET /api/users`.
-  - `createUser(payload)` - calls `POST /api/users`.
-  - `updateUser(id, payload)` - calls `PUT /api/users/{id}`.
-  - `disableUser(id)` - calls `POST /api/users/{id}/disable`.
-  - `changePassword(payload)` - calls `POST /api/users/me/password`.
+#### Home Component
 
-#### Authorization
-
-- Ensure only ADMIN users can access `/users` routes.
-- Use the same `authGuard` to protect these routes and the change-password page.
+- Displays all roles as individual badges in a flex row.
 
 ---
 
@@ -135,37 +162,30 @@ Create a page (route `/me/change-password`) for authenticated users to change th
 ```
 backend/
 ├── src/main/java/.../
+│   ├── entity/AppUser.java
+│   ├── repository/AppUserRepository.java
+│   ├── dto/UserDtos.java
+│   ├── dto/AuthDtos.java
+│   ├── controller/AuthController.java
 │   ├── controller/UserManagementController.java
-│   ├── dto/UserDto.java
-│   ├── dto/ChangePasswordDto.java
 │   ├── service/UserManagementService.java
-│   └── security/...
+│   └── security/
+│       ├── SecurityConfig.java
+│       └── AppUserDetailsService.java
 └── src/main/resources/
     └── db/migration/V2__UC-02-user-management.sql
 
 frontend/
-└── src/
-    ├── app/
-    │   ├── features/
-    │   │   └── users/
-    │   │       ├── users.module.ts
-    │   │       ├── users.routes.ts
-    │   │       ├── user-list/
-    │   │       │   ├── user-list.component.ts
-    │   │       │   ├── user-list.component.html
-    │   │       │   └── user-list.component.scss
-    │   │       ├── user-form/
-    │   │       │   ├── user-form.component.ts
-    │   │       │   ├── user-form.component.html
-    │   │       │   └── user-form.component.scss
-    │   │       └── change-password/
-    │   │           ├── change-password.component.ts
-    │   │           ├── change-password.component.html
-    │   │           └── change-password.component.scss
-    │   └── core/
-    │       └── services/user.service.ts
-    └── environments/
-        └── environment.ts
+└── src/app/
+    ├── core/
+    │   ├── services/auth.service.ts
+    │   ├── services/user.service.ts
+    │   └── guards/admin.guard.ts
+    └── features/
+        ├── home/home.component.ts
+        └── users/
+            ├── user-list/user-list.component.ts
+            └── change-password/change-password.component.ts
 ```
 
 ---
@@ -173,9 +193,14 @@ frontend/
 ## Validation Checklist
 
 - [ ] ADMIN can list, create, edit, and disable users.
+- [ ] A user can be assigned multiple roles simultaneously.
+- [ ] Form submission is blocked if no role is selected.
+- [ ] Spring Security authorities reflect all assigned roles.
+- [ ] `hasRole('ADMIN')` guard uses `roles` array, not a single `role` field.
 - [ ] Disabling a user prevents future logins and invalidates current sessions.
-- [ ] ADMIN cannot disable themself (or last ADMIN account).
+- [ ] ADMIN cannot disable their own account.
 - [ ] Users can change their own password with current-password validation.
-- [ ] All user management endpoints return the correct HTTP status codes (401/403/400/200).
+- [ ] All user management endpoints return correct HTTP status codes (200/400/401/403).
 - [ ] API responses do not leak sensitive information (e.g., hashed passwords).
 - [ ] Frontend guards prevent unauthorized access.
+- [ ] Flyway V2 migrates `role` column to `app_user_roles` join table cleanly.

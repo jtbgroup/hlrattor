@@ -3,23 +3,23 @@
 
     <div class="login-header">
       <div class="logo-mark"></div>
-      <h1>hlrattor</h1>
-      <p class="subtitle">Sign in to continue</p>
+      <h1>{{ 'login.title' | translate }}</h1>
+      <p class="subtitle">{{ 'login.subtitle' | translate }}</p>
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Username</mat-label>
+        <mat-label>{{ 'login.username' | translate }}</mat-label>
         <mat-icon matPrefix>person_outline</mat-icon>
         <input matInput formControlName="username" autocomplete="username" />
         @if (loginForm.get('username')?.hasError('required') && loginForm.get('username')?.touched) {
-          <mat-error>Username is required</mat-error>
+          <mat-error>{{ 'login.usernameRequired' | translate }}</mat-error>
         }
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Password</mat-label>
+        <mat-label>{{ 'login.password' | translate }}</mat-label>
         <mat-icon matPrefix>lock_outline</mat-icon>
         <input matInput formControlName="password"
                [type]="hidePassword ? 'password' : 'text'"
@@ -29,7 +29,7 @@
           <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
         @if (loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched) {
-          <mat-error>Password is required</mat-error>
+          <mat-error>{{ 'login.passwordRequired' | translate }}</mat-error>
         }
       </mat-form-field>
 
@@ -41,12 +41,12 @@
       }
 
       <button mat-flat-button color="primary" type="submit"
-              class="full-width submit-btn"
+              class="full-width btn-login"
               [disabled]="loading">
         @if (loading) {
           <mat-spinner diameter="20" />
         } @else {
-          Sign In
+          {{ 'login.signIn' | translate }}
         }
       </button>
 

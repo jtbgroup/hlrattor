@@ -1,0 +1,141 @@
+// ─── Colors — Brand ───────────────────────────────────────────────────────────
+// Modifier ici pour changer la palette globale de l'appli.
+
+$color-primary:      #3949ab;
+$color-primary-dark: #1a237e;
+
+$color-brand-deep:   #1a237e;
+$color-brand-mid:    #283593;
+$color-brand-light:  #3949ab;
+$color-brand-accent: #90caf9;
+$color-brand-bg:     #e8eaf6;
+$color-brand-hover:  #f5f6ff;
+
+$color-secondary:      #6c757d;
+$color-secondary-dark: #5a6268;
+
+$color-danger:      #dc3545;
+$color-danger-dark: #c82333;
+$color-danger-text: #c62828;
+
+$color-success:      #28a745;
+$color-success-bg:   #e8f5e9;
+$color-success-text: #2e7d32;
+
+$color-warning-bg:   #fce4ec;
+$color-warning-text: #b71c1c;
+
+// ─── Colors — Neutrals ────────────────────────────────────────────────────────
+
+$color-text:       #1a1a2e;
+$color-text-alt:   #333;
+$color-text-muted: #6c757d;
+$color-text-light: #aaa;
+$color-text-white: #ffffff;
+
+$color-border:       #dee2e6;
+$color-border-light: #e9ecef;
+
+$color-bg:       #f0f2f8;
+$color-bg-alt:   #f5f7fa;
+$color-bg-white: #ffffff;
+
+// ─── Colors — Error ───────────────────────────────────────────────────────────
+
+$color-error-bg:     #f8d7da;
+$color-error-border: #f5c6cb;
+$color-error-text:   #721c24;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── UI Semantics ─────────────────────────────────────────────────────────────
+// C'est ici qu'on adapte le thème visuel. Chaque variable pointe vers
+// une brand color, ce qui permet de tout changer depuis un seul endroit.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ── Table ─────────────────────────────────────────────────────────────────────
+$table-card-border:       rgba($color-brand-light, 0.12);  // bordure de la card
+$table-header-bg:         $color-primary;                  // fond ligne header
+$table-header-color:      $color-text-white;               // texte header
+$table-header-border:     rgba($color-brand-light, 0.15);  // trait sous header
+$table-row-hover:         $color-brand-hover;              // hover ligne
+$table-cell-border:       rgba($color-brand-light, 0.07);  // séparateur cellules
+
+// ── Boutons ───────────────────────────────────────────────────────────────────
+// Utilisés via les tokens MDC dans _buttons.scss
+$btn-primary-bg:          $color-primary;
+$btn-primary-bg-hover:    $color-primary-dark;
+$btn-primary-text-color:  $color-text-white;
+$btn-save-bg:             $color-brand-light;
+$btn-save-bg-hover:       $color-brand-mid;
+
+// ── Formulaires (mat-form-field) ──────────────────────────────────────────────
+// Tokens MDC : --mdc-outlined-text-field-focus-outline-color
+//              --mat-select-focused-arrow-color
+$form-focus-color:        $color-primary;
+$form-label-color:        $color-brand-deep;
+
+// ── Slide toggle (mat-slide-toggle) ───────────────────────────────────────────
+// Tokens MDC : --mdc-switch-selected-track-color
+//              --mdc-switch-selected-handle-color
+$toggle-active-track:     $color-primary;
+$toggle-active-handle:    $color-bg-white;
+
+// ── Chips / Badges ────────────────────────────────────────────────────────────
+$chip-bg:                 $color-brand-bg;
+$chip-color:              $color-brand-deep;
+
+// ── Titres de page ────────────────────────────────────────────────────────────
+$page-title-color:        $color-brand-deep;
+
+// ── Cards (form-card, table-card) ─────────────────────────────────────────────
+$card-border-color:       rgba($color-brand-light, 0.15);
+
+// ─── Spacing ──────────────────────────────────────────────────────────────────
+
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+
+// ─── Borders ──────────────────────────────────────────────────────────────────
+
+$border-radius-sm:   4px;
+$border-radius-md:   8px;
+$border-radius-lg:   12px;
+$border-radius-pill: 20px;
+
+// ─── Shadows ──────────────────────────────────────────────────────────────────
+
+$shadow-card:    0 2px 4px rgba(0, 0, 0, 0.1);
+$shadow-card-md: 0 2px 12px rgba(26, 35, 126, 0.06);
+$shadow-header:  0 2px 8px rgba(26, 35, 126, 0.35);
+
+// ─── Layout / Containers ──────────────────────────────────────────────────────
+
+$container-sm:   720px;
+$container-md:   800px;
+$container-lg:   860px;
+$container-xl:   1100px;
+$container-full: 1400px;
+
+// ─── Typography ───────────────────────────────────────────────────────────────
+
+$font-family:
+  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+  Arial, sans-serif;
+
+$font-size-base: 1rem;
+$font-size-sm:   0.875rem;
+$font-size-xs:   0.8rem;
+$font-size-xxs:  0.75rem;
+$font-size-lg:   1.1rem;
+$font-size-xl:   1.3rem;
+$font-size-2xl:  1.5rem;
+
+$font-weight-normal:   400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+$font-weight-bold:     700;
+
+$line-height-base: 1.5;

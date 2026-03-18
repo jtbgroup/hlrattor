@@ -1,7 +1,8 @@
 package com.hlrattor.repository;
 
-import com.hlrattor.entity.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.hlrattor.entity.AppUser;
 
 import java.util.Optional;
 import java.util.UUID;

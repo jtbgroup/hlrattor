@@ -9,22 +9,48 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent)
   },
   {
-    path: 'users',
-    canActivate: [authGuard, adminGuard],
-    loadComponent: () =>
-      import('./features/users/user-list/user-list.component').then(m => m.UserListComponent)
-  },
-  {
-    path: 'me/change-password',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/users/change-password/change-password.component').then(m => m.ChangePasswordComponent)
-  },
-  {
+    // Shell layout: header + router-outlet for all protected pages
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./features/home/home.component').then(m => m.HomeComponent)
+      import('./shared/components/shell/app-shell.component').then(m => m.AppShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/home/home.component').then(m => m.HomeComponent)
+      },
+      {
+        path: 'me/change-password',
+        loadComponent: () =>
+          import('./features/users/change-password/change-password.component').then(
+            m => m.ChangePasswordComponent
+          )
+      },
+      {
+        path: 'admin/users',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/users/user-list/user-list.component').then(m => m.UserListComponent)
+      },
+      {
+        path: 'admin/users/new',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent)
+      },
+      {
+        path: 'admin/users/:id/edit',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/users/user-form/user-form.component').then(m => m.UserFormComponent)
+      },
+      {
+        path: 'projects',
+        loadChildren: () =>
+          import('./features/projects/projects.routes').then(m => m.PROJECTS_ROUTES)
+      }
+    ]
   },
   {
     path: '**',

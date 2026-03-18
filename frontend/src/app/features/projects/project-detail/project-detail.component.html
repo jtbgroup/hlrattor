@@ -1,0 +1,288 @@
+<div *ngIf="loading" class="loading">Loading…</div>
+
+<ng-container *ngIf="!loading && project">
+
+  <!-- Read-only banner -->
+  <div *ngIf="isReadOnly" class="readonly-banner">
+    <mat-icon>lock</mat-icon>
+    This project is <strong>{{ project.currentStatus }}</strong>. Change its status to edit it.
+  </div>
+
+  <!-- ===== HEADER SECTION ===== -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>Project Info</mat-card-title>
+      <span class="spacer"></span>
+      <button *ngIf="canEdit && !editingHeader && !isReadOnly"
+              mat-icon-button (click)="editingHeader = true" matTooltip="Edit">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ng-container *ngIf="!editingHeader">
+        <div class="field-grid">
+          <div class="field"><span class="label">Reference</span><span>{{ project.reference }}</span></div>
+          <div class="field"><span class="label">Name</span><span>{{ project.name }}</span></div>
+          <div class="field"><span class="label">Sciforma Code</span><span>{{ project.sciformaCode }}</span></div>
+          <div class="field"><span class="label">PORD BIA</span><span>{{ project.pordBia ?? '—' }}</span></div>
+          <div class="field"><span class="label">PORD Project</span><span>{{ project.pordProject ?? '—' }}</span></div>
+          <div class="field"><span class="label">Created by</span><span>{{ project.createdBy }} — {{ project.createdAt | date:'short' }}</span></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="editingHeader">
+        <form [formGroup]="headerForm" class="inline-form">
+          <mat-form-field appearance="outline" *ngIf="isAdmin">
+            <mat-label>Reference</mat-label>
+            <input matInput formControlName="reference" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" *ngIf="isAdmin">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Sciforma Code</mat-label>
+            <input matInput formControlName="sciformaCode" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>PORD BIA</mat-label>
+            <input matInput formControlName="pordBia" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>PORD Project</mat-label>
+            <input matInput formControlName="pordProject" />
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button (click)="cancelHeader()">Cancel</button>
+            <button mat-raised-button color="primary" (click)="saveHeader()">Save</button>
+          </div>
+        </form>
+      </ng-container>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ===== STATUS SECTION ===== -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>
+        Status
+        <mat-chip [color]="statusColor(project.currentStatus)" highlighted class="status-chip">
+          {{ project.currentStatus }}
+        </mat-chip>
+      </mat-card-title>
+      <span class="spacer"></span>
+      <button *ngIf="canEdit" mat-stroked-button (click)="showStatusForm = !showStatusForm">
+        <mat-icon>swap_horiz</mat-icon> Change Status
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ng-container *ngIf="showStatusForm">
+        <form [formGroup]="statusForm" class="inline-form row">
+          <mat-form-field appearance="outline">
+            <mat-label>New Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Business Date</mat-label>
+            <input matInput [matDatepicker]="statusPicker" formControlName="businessDate" />
+            <mat-datepicker-toggle matSuffix [for]="statusPicker"></mat-datepicker-toggle>
+            <mat-datepicker #statusPicker></mat-datepicker>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button (click)="showStatusForm = false">Cancel</button>
+            <button mat-raised-button color="primary" (click)="submitStatus()" [disabled]="statusForm.invalid">Apply</button>
+          </div>
+        </form>
+        <mat-divider></mat-divider>
+      </ng-container>
+
+      <mat-table [dataSource]="project.statusHistory" class="history-table">
+        <ng-container matColumnDef="status">
+          <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <mat-chip [color]="statusColor(row.status)" highlighted>{{ row.status }}</mat-chip>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="businessDate">
+          <mat-header-cell *matHeaderCellDef>Business Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.businessDate }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="changedBy">
+          <mat-header-cell *matHeaderCellDef>Changed By</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.changedBy }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="changedAt">
+          <mat-header-cell *matHeaderCellDef>Changed At</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.changedAt | date:'short' }}</mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="statusColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: statusColumns;"></mat-row>
+      </mat-table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ===== PROJECT MANAGER SECTION ===== -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>
+        Project Manager
+        <span class="current-value">{{ project.currentProjectManager ?? '—' }}</span>
+      </mat-card-title>
+      <span class="spacer"></span>
+      <button *ngIf="isAdmin && !isReadOnly" mat-stroked-button (click)="showPmForm = !showPmForm">
+        <mat-icon>person_add</mat-icon> Change PM
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ng-container *ngIf="showPmForm">
+        <form [formGroup]="pmForm" class="inline-form row">
+          <mat-form-field appearance="outline">
+            <mat-label>New Project Manager</mat-label>
+            <mat-select formControlName="projectManagerId">
+              <mat-option *ngFor="let pm of projectManagers" [value]="pm.id">{{ pm.username }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button (click)="showPmForm = false">Cancel</button>
+            <button mat-raised-button color="primary" (click)="submitPm()" [disabled]="pmForm.invalid">Apply</button>
+          </div>
+        </form>
+        <mat-divider></mat-divider>
+      </ng-container>
+
+      <mat-table [dataSource]="project.managerHistory" class="history-table">
+        <ng-container matColumnDef="projectManager">
+          <mat-header-cell *matHeaderCellDef>Project Manager</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.projectManager }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="startDate">
+          <mat-header-cell *matHeaderCellDef>From</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.startDate }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="endDate">
+          <mat-header-cell *matHeaderCellDef>To</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.endDate ?? 'Current' }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="assignedBy">
+          <mat-header-cell *matHeaderCellDef>Assigned By</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.assignedBy }}</mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="pmColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: pmColumns;"></mat-row>
+      </mat-table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ===== DUE DATE SECTION ===== -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>
+        Due Date
+        <span class="current-value">{{ project.currentDueDate ?? '—' }}</span>
+      </mat-card-title>
+      <span class="spacer"></span>
+      <button *ngIf="canEdit && !isReadOnly" mat-stroked-button (click)="showDueDateForm = !showDueDateForm">
+        <mat-icon>event</mat-icon> Change Due Date
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <ng-container *ngIf="showDueDateForm">
+        <form [formGroup]="dueDateForm" class="inline-form row">
+          <mat-form-field appearance="outline">
+            <mat-label>New Due Date</mat-label>
+            <input matInput [matDatepicker]="duePicker" formControlName="dueDate" />
+            <mat-datepicker-toggle matSuffix [for]="duePicker"></mat-datepicker-toggle>
+            <mat-datepicker #duePicker></mat-datepicker>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-button (click)="showDueDateForm = false">Cancel</button>
+            <button mat-raised-button color="primary" (click)="submitDueDate()" [disabled]="dueDateForm.invalid">Apply</button>
+          </div>
+        </form>
+        <mat-divider></mat-divider>
+      </ng-container>
+
+      <mat-table [dataSource]="project.dueDateHistory" class="history-table">
+        <ng-container matColumnDef="dueDate">
+          <mat-header-cell *matHeaderCellDef>Due Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.dueDate }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="changedBy">
+          <mat-header-cell *matHeaderCellDef>Changed By</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.changedBy }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="changedAt">
+          <mat-header-cell *matHeaderCellDef>Changed At</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.changedAt | date:'short' }}</mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="dueDateColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: dueDateColumns;"></mat-row>
+      </mat-table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- ===== BUDGET SECTION ===== -->
+  <mat-card class="section-card">
+    <mat-card-header>
+      <mat-card-title>
+        Budget
+        <span class="current-value total-budget">{{ project.totalBudget | number:'1.2-2' }} €</span>
+      </mat-card-title>
+      <span class="spacer"></span>
+      <button *ngIf="canEdit && !isReadOnly" mat-raised-button color="accent" (click)="openAddBudgetLine()">
+        <mat-icon>add</mat-icon> Add Line
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-table [dataSource]="project.budgetLines" class="budget-table">
+        <ng-container matColumnDef="type">
+          <mat-header-cell *matHeaderCellDef>Type</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.type }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <mat-header-cell *matHeaderCellDef>Amount (€)</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.amount | number:'1.2-2' }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="date">
+          <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.date }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="pordReference">
+          <mat-header-cell *matHeaderCellDef>PORD Ref.</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.pordReference ?? '—' }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="createdBy">
+          <mat-header-cell *matHeaderCellDef>Created By</mat-header-cell>
+          <mat-cell *matCellDef="let row">{{ row.createdBy }}</mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef></mat-header-cell>
+          <mat-cell *matCellDef="let row">
+            <ng-container *ngIf="canEdit && !isReadOnly">
+              <button mat-icon-button (click)="openEditBudgetLine(row)" matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteBudgetLine(row)" matTooltip="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </ng-container>
+          </mat-cell>
+        </ng-container>
+        <mat-header-row *matHeaderRowDef="budgetColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: budgetColumns;"></mat-row>
+      </mat-table>
+
+      <div *ngIf="project.budgetLines.length === 0" class="empty-state">
+        No budget lines yet.
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+</ng-container>

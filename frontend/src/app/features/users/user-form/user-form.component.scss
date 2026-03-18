@@ -1,0 +1,57 @@
+@use 'styles/variables' as *;
+
+// ── Page header ───────────────────────────────────────────────────────────────
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.btn-back {
+  color: $color-brand-deep;
+}
+
+.page-title {
+  margin: 0;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-brand-deep;
+}
+
+// ── Form card ─────────────────────────────────────────────────────────────────
+
+.form-card {
+  background: $color-bg-white;
+  border-radius: $border-radius-lg;
+  border: 1px solid rgba(57, 73, 171, 0.15);
+  box-shadow: $shadow-card-md;
+  padding: 28px 32px;
+  max-width: 560px;
+}
+
+// ── Form layout ───────────────────────────────────────────────────────────────
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.form-error {
+  color: $color-danger-text;
+  font-size: $font-size-sm;
+  margin-top: 4px;
+}

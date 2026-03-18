@@ -3,5 +3,5 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:8080',
-  appVersion: '0.0.1'
+  appVersion: '1.0.0'
 };

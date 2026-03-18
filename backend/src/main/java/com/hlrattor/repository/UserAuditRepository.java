@@ -1,7 +1,8 @@
 package com.hlrattor.repository;
 
-import com.hlrattor.entity.UserAudit;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.hlrattor.entity.UserAudit;
 
 import java.util.UUID;
 

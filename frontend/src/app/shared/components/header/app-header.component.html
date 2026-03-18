@@ -1,0 +1,72 @@
+<header class="app-toolbar">
+  <span class="app-title">
+    <span class="title-accent">webapp</span>hlrattor
+  </span>
+  <div class="nav-divider-left"></div>
+
+  <!-- Projects — visible to all authenticated users -->
+  <button class="nav-btn" (click)="router.navigate(['/projects'])">
+    {{ 'header.projects' | translate }}
+  </button>
+
+  @if (authService.hasRole('ADMIN')) {
+    <button class="nav-btn" [matMenuTriggerFor]="adminMenu">
+      {{ 'header.admin' | translate }}
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    </button>
+    <mat-menu #adminMenu="matMenu">
+      <button mat-menu-item (click)="router.navigate(['/admin/users'])">
+        <mat-icon>group</mat-icon>
+        <span>{{ 'header.users' | translate }}</span>
+      </button>
+    </mat-menu>
+  }
+
+  <span class="spacer"></span>
+  <div class="nav-divider"></div>
+
+  <button class="user-pill" [matMenuTriggerFor]="userMenu">
+    <mat-icon>account_circle</mat-icon>
+    <span>{{ authService.currentUser()?.username }}</span>
+    <mat-icon>keyboard_arrow_down</mat-icon>
+  </button>
+  <mat-menu #userMenu="matMenu">
+    <!-- User info header -->
+    <div class="user-menu-header">
+      <div class="user-role-badge">{{ authService.currentUser()?.roles?.join(', ') }}</div>
+      <span class="username-label">{{ authService.currentUser()?.username }}</span>
+    </div>
+    <mat-divider />
+    <!-- Change password -->
+    <button mat-menu-item (click)="router.navigate(['/me/change-password'])">
+      <mat-icon>lock_outline</mat-icon>
+      <span>{{ 'header.changePassword' | translate }}</span>
+    </button>
+    <mat-divider />
+    <!-- Language switcher -->
+    <button mat-menu-item [matMenuTriggerFor]="langMenu">
+      <mat-icon>language</mat-icon>
+      <span>{{ 'header.language' | translate }}</span>
+      <span class="lang-current">{{ i18n.lang().toUpperCase() }}</span>
+    </button>
+    <mat-menu #langMenu="matMenu">
+      @for (lang of languages; track lang.code) {
+        <button mat-menu-item
+                (click)="setLang(lang.code)"
+                [class.lang-active]="i18n.lang() === lang.code">
+          <span class="lang-flag">{{ lang.flag }}</span>
+          <span>{{ ('languages.' + lang.code) | translate }}</span>
+          @if (i18n.lang() === lang.code) {
+            <mat-icon class="lang-check">check</mat-icon>
+          }
+        </button>
+      }
+    </mat-menu>
+    <mat-divider />
+    <!-- Sign out -->
+    <button mat-menu-item class="logout-item" (click)="authService.logout()">
+      <mat-icon>logout</mat-icon>
+      <span>{{ 'header.signOut' | translate }}</span>
+    </button>
+  </mat-menu>
+</header>

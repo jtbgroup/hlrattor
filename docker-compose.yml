@@ -1,35 +1,70 @@
 services:
-
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-hlrattor}
-      POSTGRES_USER: ${POSTGRES_USER:-hlrattor}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hlrattor}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hlrattor}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    restart: unless-stopped
-
+  # Application (Backend + Frontend + Nginx)
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: hlrattor-app
     ports:
-      - "8080:8080"
+      - "8090:8090"
     environment:
-      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-hlrattor}
-      DB_USERNAME: ${POSTGRES_USER:-hlrattor}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-hlrattor}
-      SERVER_PORT: 8081
+      # Profile: h2 (embedded) ou postgres (external)
+      SPRING_PROFILES_ACTIVE: ${DB_PROFILE:-h2}
+      SERVER_PORT: 8090
+      
+      # PostgreSQL config (utilisé si SPRING_PROFILES_ACTIVE=postgres)
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-hlrattor}
+      DB_USER: ${DB_USER:-hlrattor}
+      DB_PASSWORD: ${DB_PASSWORD:-hlrattor}
+      
+      # JVM tuning
+      JAVA_OPTS: "-Xmx1024m -Xms512m"
+    
     depends_on:
-      db:
-        condition: service_healthy
+      - postgres:
+          condition: service_healthy
+          required: false  
+          
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
     restart: unless-stopped
+    networks:
+      - hlrattor-network
+
+  # PostgreSQL (optionnel - utilisé si DB_PROFILE=postgres)
+  postgres:
+    image: postgres:17-alpine
+    container_name: hlrattor-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-hlrattor}
+      POSTGRES_USER: ${DB_USER:-hlrattor}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hlrattor}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hlrattor}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hlrattor-network
+    profiles:
+      - postgres
 
 volumes:
-  pg_data:
+  postgres_data:
+    driver: local
+
+networks:
+  hlrattor-network:
+    driver: bridge

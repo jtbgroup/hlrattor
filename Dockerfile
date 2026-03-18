@@ -1,43 +1,60 @@
-# ─── Stage 1: Build Frontend ───────────────────────────────────────────────
-FROM node:22-alpine AS frontend-build
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ ./
-RUN npm run build -- --configuration production
+# ============================================
+# Build stage - compile backend + frontend
+# ============================================
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# ─── Stage 2: Build Backend ────────────────────────────────────────────────
-FROM maven:3.9-eclipse-temurin-21 AS backend-build
-WORKDIR /app/backend
-COPY backend/pom.xml ./
-RUN mvn dependency:go-offline -q
+# Build backend
+WORKDIR /build/backend
+COPY backend/pom.xml .
 COPY backend/src ./src
-RUN mvn package -DskipTests -q
+RUN mvn clean package -DskipTests -q
 
-# ─── Stage 3: Production image (nginx + backend) ───────────────────────────
-FROM eclipse-temurin:21-jre-alpine
-RUN apk add --no-cache nginx
+# Build frontend
+FROM node:22-alpine AS frontend-builder
+
+WORKDIR /build/frontend
+COPY frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY frontend . 
+RUN npm run build
+
+# ============================================
+# Production stage - runtime with Nginx
+# ============================================
+FROM eclipse-temurin:21-jdk-alpine AS production
+
+# Install Nginx
+RUN apk add --no-cache nginx curl
+
+# Create app user
+RUN addgroup -g 1001 appuser && \
+    adduser -D -u 1001 -G appuser appuser
 
 WORKDIR /app
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Ensure nginx directories are writable by the app user
-RUN mkdir -p /var/log/nginx /var/run /etc/nginx/http.d && \
-    chown -R appuser:appgroup /var/log/nginx /var/run /etc/nginx/http.d /var/lib/nginx /run
+# Copy built backend JAR
+COPY --from=builder /build/backend/target/*.jar app.jar
 
-# Copy built artifacts
-COPY --from=backend-build /app/backend/target/*.jar app.jar
-COPY --from=frontend-build /app/frontend/dist/hlrattor/browser /app/static
+# Copy Nginx config
+COPY docker/nginx.prod.conf /etc/nginx/nginx.conf
 
-# nginx config
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-RUN rm -f /etc/nginx/http.d/default.conf
-COPY docker/nginx.prod.conf /etc/nginx/http.d/default.conf
+# Copy entrypoint script
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && chown appuser:appuser /entrypoint.sh
 
-# Entrypoint that runs nginx + backend together
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy frontend static assets
+COPY --from=frontend-builder /build/frontend/dist/hlrattor /usr/share/nginx/html
+
+# Fix permissions
+RUN chown -R appuser:appuser /app /usr/share/nginx/html /var/log/nginx /var/run/nginx.pid
 
 USER appuser
-EXPOSE 8080
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+EXPOSE 8090
+
+ENV SPRING_PROFILES_ACTIVE=postgres
+ENV SERVER_PORT=8090
+ENV JAVA_OPTS="-Xmx1024m -Xms512m"
+
+ENTRYPOINT ["/entrypoint.sh"]

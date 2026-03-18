@@ -1,0 +1,44 @@
+@use "variables" as *;
+
+// ── Table card ────────────────────────────────────────────────────────────────
+
+.table-card {
+  background: $color-bg-white;
+  border-radius: $border-radius-lg;
+  border: 1px solid $table-card-border;
+  box-shadow: $shadow-card-md;
+  overflow: hidden;
+}
+
+.user-table {
+  width: 60%;
+
+  // ── Header — CSS classique, pas de token MDC nécessaire ──────────────────
+  .mat-mdc-header-row {
+    background: $table-header-bg;
+  }
+
+  .mat-mdc-header-cell {
+    color: $table-header-color;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-xxs;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 2px solid $table-header-border;
+  }
+
+  // ── Rows ─────────────────────────────────────────────────────────────────
+  .mat-mdc-row {
+    transition: background 0.12s ease;
+
+    &:hover {
+      background: $table-row-hover;
+    }
+  }
+
+  .mat-mdc-cell {
+    border-bottom-color: $table-cell-border;
+    color: $color-text;
+    font-size: $font-size-sm;
+  }
+}

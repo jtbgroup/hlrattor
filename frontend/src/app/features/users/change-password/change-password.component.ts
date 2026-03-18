@@ -5,33 +5,44 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ChangePasswordDto, UserService } from '../../../core/services/user.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    TranslatePipe,
+  ],
   template: `
     <!-- eslint-disable @angular-eslint/template/prefer-control-flow -->
     <div class="container">
-      <h2>Change Password</h2>
+      <h2>{{ 'changePassword.title' | translate }}</h2>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Current password</mat-label>
+          <mat-label>{{ 'changePassword.currentPassword' | translate }}</mat-label>
           <input matInput type="password" formControlName="currentPassword" required />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>New password</mat-label>
+          <mat-label>{{ 'changePassword.newPassword' | translate }}</mat-label>
           <input matInput type="password" formControlName="newPassword" required />
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Confirm new password</mat-label>
+          <mat-label>{{ 'changePassword.confirmPassword' | translate }}</mat-label>
           <input matInput type="password" formControlName="confirmPassword" required />
         </mat-form-field>
 
         <div class="actions">
-          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">Change password</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+            {{ 'changePassword.submit' | translate }}
+          </button>
         </div>
 
         <ng-container *ngIf="message">
@@ -52,6 +63,7 @@ import { ChangePasswordDto, UserService } from '../../../core/services/user.serv
 export class ChangePasswordComponent {
   private readonly fb = inject(FormBuilder);
   private readonly userService = inject(UserService);
+  private readonly i18n = inject(I18nService);
 
   form = this.fb.group({
     currentPassword: ['', Validators.required],
@@ -62,18 +74,16 @@ export class ChangePasswordComponent {
   message = '';
 
   onSubmit() {
-    if (this.form.invalid) {
-      return;
-    }
+    if (this.form.invalid) return;
 
     const payload = this.form.value as ChangePasswordDto;
     this.userService.changePassword(payload).subscribe({
       next: () => {
-        this.message = 'Password changed successfully.';
+        this.message = this.i18n.translate('changePassword.success');
         this.form.reset();
       },
       error: () => {
-        this.message = 'Unable to change password. Check your current password and try again.';
+        this.message = this.i18n.translate('changePassword.error');
       }
     });
   }

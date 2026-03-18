@@ -8,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-login',
@@ -19,7 +21,8 @@ import { AuthService } from '../../../core/services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    TranslatePipe,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
@@ -29,6 +32,7 @@ export class LoginComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  readonly i18n = inject(I18nService);
 
   loginForm: FormGroup = this.fb.group({
     username: ['', [Validators.required]],
@@ -50,7 +54,7 @@ export class LoginComponent {
       next: () => this.router.navigate(['/']),
       error: () => {
         this.loading = false;
-        this.errorMessage = 'Invalid username or password.';
+        this.errorMessage = this.i18n.translate('login.invalidCredentials');
         this.loginForm.get('password')?.reset();
       }
     });

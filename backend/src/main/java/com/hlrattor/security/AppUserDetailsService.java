@@ -1,6 +1,5 @@
 package com.hlrattor.security;
 
-import com.hlrattor.repository.AppUserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,7 +7,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.hlrattor.repository.AppUserRepository;
+
+import java.util.stream.Collectors;
 
 @Service
 public class AppUserDetailsService implements UserDetailsService {
@@ -27,7 +28,9 @@ public class AppUserDetailsService implements UserDetailsService {
                         user.getPassword(),
                         user.isEnabled(),
                         true, true, true,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                        user.getRoles().stream()
+                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                                .collect(Collectors.toSet())
                 ))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }

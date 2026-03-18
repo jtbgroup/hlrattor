@@ -18,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -49,7 +51,10 @@ public class AuthController {
             securityContextRepository.saveContext(context, httpRequest, httpResponse);
 
             return userRepository.findByUsername(request.username())
-                    .map(user -> ResponseEntity.ok(new UserResponse(user.getUsername(), user.getRole().name())))
+                    .map(user -> ResponseEntity.ok(new UserResponse(
+                            user.getUsername(),
+                            user.getRoles().stream().map(Enum::name).collect(Collectors.toList())
+                    )))
                     .orElse(ResponseEntity.status(401).build());
 
         } catch (BadCredentialsException e) {
@@ -73,7 +78,10 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
         return userRepository.findByUsername(userDetails.getUsername())
-                .map(user -> ResponseEntity.ok(new UserResponse(user.getUsername(), user.getRole().name())))
+                .map(user -> ResponseEntity.ok(new UserResponse(
+                        user.getUsername(),
+                        user.getRoles().stream().map(Enum::name).collect(Collectors.toList())
+                )))
                 .orElse(ResponseEntity.status(401).build());
     }
 }

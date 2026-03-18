@@ -20,12 +20,9 @@ import org.springframework.security.web.context.SecurityContextRepository;
 public class SecurityConfig {
 
     private final AppUserDetailsService userDetailsService;
-    private final SessionRegistrationFilter sessionRegistrationFilter;
 
-    public SecurityConfig(AppUserDetailsService userDetailsService,
-                          SessionRegistrationFilter sessionRegistrationFilter) {
+    public SecurityConfig(AppUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.sessionRegistrationFilter = sessionRegistrationFilter;
     }
 
     /**
@@ -41,8 +38,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/version").permitAll()
-                .requestMatchers("/api/users/me/password").authenticated()
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
@@ -57,8 +52,7 @@ public class SecurityConfig {
                     response.sendError(401, "Unauthorized"))
                 .accessDeniedHandler((request, response, accessDeniedException) ->
                     response.sendError(403, "Forbidden"))
-            )
-            .addFilterAfter(sessionRegistrationFilter, org.springframework.security.web.context.SecurityContextPersistenceFilter.class);
+            );
 
         return http.build();
     }

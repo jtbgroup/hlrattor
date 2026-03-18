@@ -1,10 +1,10 @@
 {
   "name": "hlrattor-frontend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --allowed-hosts all",
     "start:prod": "ng serve --configuration production",
     "build": "ng build --configuration production",
     "build:dev": "ng build --configuration development",

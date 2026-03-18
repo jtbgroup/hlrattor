@@ -1,0 +1,48 @@
+# ============================================
+# Development Dockerfile with H2
+# Features:
+# - H2 in-memory database
+# - Maven hot reload
+# - Remote debugging (port 5005)
+# - Node.js for Angular build watch
+# - Nginx for routing
+# ============================================
+
+FROM maven:3.9.6-eclipse-temurin-21-alpine
+
+# Install development dependencies
+RUN apk add --no-cache \
+    curl \
+    git \
+    nodejs \
+    npm \
+    nginx \
+    bash \
+    supervisor
+
+# Create application directories
+WORKDIR /app
+RUN mkdir -p /app/backend /app/frontend /app/nginx /var/log/supervisor
+
+# Copy nginx configuration
+COPY docker/nginx.dev.conf /etc/nginx/nginx.conf
+
+# Copy supervisor configuration
+COPY docker/supervisord.dev.conf /etc/supervisord.conf
+
+# Pre-install Node modules if package.json exists (for faster startup)
+COPY frontend/package*.json* /app/frontend/
+RUN if [ -f /app/frontend/package.json ]; then \
+      cd /app/frontend && npm ci --no-audit --no-fund || true; \
+    fi
+
+# Expose ports
+EXPOSE 8080 8081 5005 4200
+
+# Set environment variables
+ENV SPRING_PROFILES_ACTIVE=h2
+ENV JAVA_OPTS="-Xmx512m -Xms256m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV MAVEN_OPTS="-Xmx512m"
+
+# Start all services via supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 export interface CurrentUser {
   username: string;
-  role: 'ADMIN' | 'PROJECT_MANAGER';
+  roles: string[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,5 +41,9 @@ export class AuthService {
 
   isAuthenticated(): boolean {
     return this.currentUser() !== null;
+  }
+
+  hasRole(role: string): boolean {
+    return this.currentUser()?.roles.includes(role) ?? false;
   }
 }

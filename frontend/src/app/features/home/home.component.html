@@ -1,0 +1,17 @@
+<div class="home-container">
+  <div class="welcome-card">
+    <div class="welcome-icon">👋</div>
+    <h1 class="welcome-title">
+      {{ 'home.hello' | translate }} <span class="username">{{ authService.currentUser()?.username }}</span>
+    </h1>
+    <p class="welcome-subtitle">{{ 'home.welcomeBack' | translate }}</p>
+    <div class="roles-container">
+      @for (role of authService.currentUser()?.roles; track role) {
+        <div class="role-badge">
+          <span class="role-dot"></span>
+          {{ role }}
+        </div>
+      }
+    </div>
+  </div>
+</div>

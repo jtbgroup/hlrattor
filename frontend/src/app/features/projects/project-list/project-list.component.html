@@ -1,0 +1,75 @@
+<div class="page-header">
+  <h1>Projects</h1>
+  <button *ngIf="isAdmin" mat-raised-button color="primary" (click)="openCreate()">
+    <mat-icon>add</mat-icon> Create project
+  </button>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
+      <mat-option value="">All</mat-option>
+      <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Project Manager</mat-label>
+    <input matInput [(ngModel)]="filterPm" (ngModelChange)="applyFilter()" placeholder="Filter by PM" />
+  </mat-form-field>
+</div>
+
+<!-- Table -->
+<mat-table [dataSource]="filtered" matSort (matSortChange)="sortData($event)" class="project-table">
+
+  <ng-container matColumnDef="reference">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Reference</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{ row.reference }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="name">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="currentStatus">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <mat-chip [color]="statusColor(row.currentStatus)" highlighted>
+        {{ row.currentStatus }}
+      </mat-chip>
+    </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="currentProjectManager">
+    <mat-header-cell *matHeaderCellDef>Project Manager</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="currentDueDate">
+    <mat-header-cell *matHeaderCellDef>Due Date</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="totalBudget">
+    <mat-header-cell *matHeaderCellDef mat-sort-header>Total Budget</mat-header-cell>
+    <mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <mat-header-cell *matHeaderCellDef></mat-header-cell>
+    <mat-cell *matCellDef="let row">
+      <button mat-icon-button (click)="goToDetail(row)" matTooltip="View detail">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"
+           class="clickable-row"
+           (click)="goToDetail(row)">
+  </mat-row>
+</mat-table>

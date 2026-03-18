@@ -1,25 +1,36 @@
 #!/bin/sh
 set -e
 
-# Start the backend in the background
-java -jar /app/app.jar &
-BACKEND_PID=$!
+echo "🚀 Starting hlrattor application..."
 
-# Start nginx in the foreground
+# Validate environment variables
+if [ -z "$SPRING_PROFILES_ACTIVE" ]; then
+    echo "❌ SPRING_PROFILES_ACTIVE not set. Defaulting to 'postgres'"
+    SPRING_PROFILES_ACTIVE="postgres"
+fi
+
+if [ -z "$SERVER_PORT" ]; then
+    SERVER_PORT="8090"
+fi
+
+echo "📋 Configuration:"
+echo "   Profile: $SPRING_PROFILES_ACTIVE"
+echo "   Port: $SERVER_PORT"
+echo "   JAVA_OPTS: $JAVA_OPTS"
+
+# Start Nginx in background
+echo "📡 Starting Nginx..."
 nginx -g "daemon off;" &
 NGINX_PID=$!
 
-# Forward signals to child processes
-_term() {
-  echo "Stopping..."
-  kill -TERM "$BACKEND_PID" 2>/dev/null || true
-  kill -TERM "$NGINX_PID" 2>/dev/null || true
-}
-trap _term TERM INT
+# Wait for Nginx to start
+sleep 2
 
-# Wait for either process to exit
-wait -n "$BACKEND_PID" "$NGINX_PID"
+# Start Spring Boot
+echo "🔧 Starting Spring Boot..."
+exec java $JAVA_OPTS -jar /app/app.jar \
+    --spring.profiles.active=$SPRING_PROFILES_ACTIVE \
+    --server.port=$SERVER_PORT
 
-# Ensure all children are stopped
-kill -TERM "$BACKEND_PID" "$NGINX_PID" 2>/dev/null || true
-wait
+# Cleanup on exit
+trap "kill $NGINX_PID 2>/dev/null" EXIT

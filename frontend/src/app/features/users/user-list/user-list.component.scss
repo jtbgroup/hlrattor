@@ -1,0 +1,133 @@
+@use 'styles/variables' as *;
+
+// ── Page header ───────────────────────────────────────────────────────────────
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-brand-deep;
+}
+
+// ── Form card ─────────────────────────────────────────────────────────────────
+
+.form-card {
+  background: $color-bg-white;
+  border-radius: $border-radius-lg;
+  border: 1px solid rgba(57, 73, 171, 0.15);
+  box-shadow: $shadow-card-md;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.form-title {
+  margin: 0 0 20px;
+  font-size: $font-size-base;
+  font-weight: $font-weight-semibold;
+  color: $color-brand-deep;
+}
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 480px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+
+.form-error {
+  color: $color-danger-text;
+  font-size: $font-size-sm;
+  margin-top: 4px;
+}
+
+// ── Role chips ────────────────────────────────────────────────────────────────
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.role-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: $color-brand-bg;
+  color: $color-brand-deep;
+  border-radius: $border-radius-sm;
+  padding: 2px 8px;
+}
+
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+.status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: $border-radius-pill;
+  padding: 3px 10px;
+
+  &.enabled {
+    background: $color-success-bg;
+    color: $color-success-text;
+  }
+
+  &.disabled {
+    background: $color-warning-bg;
+    color: $color-warning-text;
+  }
+}
+
+// ── Actions cell ──────────────────────────────────────────────────────────────
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: rgba(0, 0, 0, 0.4);
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.35;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}

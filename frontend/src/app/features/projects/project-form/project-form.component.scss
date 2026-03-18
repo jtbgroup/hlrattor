@@ -1,0 +1,10 @@
+.project-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 480px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}

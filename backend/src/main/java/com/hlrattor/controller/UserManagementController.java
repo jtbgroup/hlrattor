@@ -1,11 +1,12 @@
 package com.hlrattor.controller;
 
-import com.hlrattor.dto.UserDtos;
-import com.hlrattor.service.UserManagementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import com.hlrattor.dto.UserDtos;
+import com.hlrattor.service.UserManagementService;
 
 import java.util.List;
 import java.util.UUID;

@@ -1,0 +1,50 @@
+<div class="page-header">
+  <button mat-icon-button class="btn-back" (click)="cancel()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <h2 class="page-title">
+    {{ (isEdit ? 'userForm.editUser' : 'userForm.createUser') | translate }}
+  </h2>
+</div>
+
+<div class="form-card">
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'userList.username' | translate }}</mat-label>
+      <input matInput formControlName="username" [readonly]="isEdit" required />
+    </mat-form-field>
+
+    @if (!isEdit) {
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'userList.password' | translate }}</mat-label>
+        <input matInput type="password" formControlName="password" required />
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'userList.roles' | translate }}</mat-label>
+      <mat-select formControlName="roles" multiple required>
+        @for (role of availableRoles; track role) {
+          <mat-option [value]="role">{{ role }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="enabled">{{ 'userList.enabled' | translate }}</mat-slide-toggle>
+
+    @if (error) {
+      <div class="form-error">{{ error }}</div>
+    }
+
+    <div class="form-actions">
+      <button mat-stroked-button type="button" (click)="cancel()">
+        {{ 'userList.cancel' | translate }}
+      </button>
+      <button mat-flat-button class="btn-save" type="submit" [disabled]="userForm.invalid">
+        {{ (isEdit ? 'userList.save' : 'userList.create') | translate }}
+      </button>
+    </div>
+
+  </form>
+</div>
