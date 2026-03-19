@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record StatusChangeDto(
-        @NotNull ProjectStatus status,
-        @NotNull LocalDate businessDate
-) {}
+                @NotNull ProjectStatus status,
+                @NotNull LocalDate businessDate) {
+}

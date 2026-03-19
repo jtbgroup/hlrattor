@@ -38,19 +38,43 @@ public class ProjectStatusHistory {
 
     // Getters & Setters
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Project getProject() {
+        return project;
+    }
 
-    public ProjectStatus getStatus() { return status; }
-    public void setStatus(ProjectStatus status) { this.status = status; }
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-    public LocalDate getBusinessDate() { return businessDate; }
-    public void setBusinessDate(LocalDate businessDate) { this.businessDate = businessDate; }
+    public ProjectStatus getStatus() {
+        return status;
+    }
 
-    public AppUser getChangedBy() { return changedBy; }
-    public void setChangedBy(AppUser changedBy) { this.changedBy = changedBy; }
+    public void setStatus(ProjectStatus status) {
+        this.status = status;
+    }
 
-    public Instant getChangedAt() { return changedAt; }
+    public LocalDate getBusinessDate() {
+        return businessDate;
+    }
+
+    public void setBusinessDate(LocalDate businessDate) {
+        this.businessDate = businessDate;
+    }
+
+    public AppUser getChangedBy() {
+        return changedBy;
+    }
+
+    public void setChangedBy(AppUser changedBy) {
+        this.changedBy = changedBy;
+    }
+
+    public Instant getChangedAt() {
+        return changedAt;
+    }
 }

@@ -26,9 +26,9 @@ public class UserManagementService {
     private final SessionRegistry sessionRegistry;
 
     public UserManagementService(AppUserRepository userRepository,
-                                  UserAuditRepository auditRepository,
-                                  PasswordEncoder passwordEncoder,
-                                  SessionRegistry sessionRegistry) {
+            UserAuditRepository auditRepository,
+            PasswordEncoder passwordEncoder,
+            SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.auditRepository = auditRepository;
         this.passwordEncoder = passwordEncoder;

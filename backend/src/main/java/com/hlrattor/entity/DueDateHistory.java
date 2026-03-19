@@ -34,16 +34,35 @@ public class DueDateHistory {
 
     // Getters & Setters
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Project getProject() {
+        return project;
+    }
 
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-    public AppUser getChangedBy() { return changedBy; }
-    public void setChangedBy(AppUser changedBy) { this.changedBy = changedBy; }
+    public LocalDate getDueDate() {
+        return dueDate;
+    }
 
-    public Instant getChangedAt() { return changedAt; }
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public AppUser getChangedBy() {
+        return changedBy;
+    }
+
+    public void setChangedBy(AppUser changedBy) {
+        this.changedBy = changedBy;
+    }
+
+    public Instant getChangedAt() {
+        return changedAt;
+    }
 }

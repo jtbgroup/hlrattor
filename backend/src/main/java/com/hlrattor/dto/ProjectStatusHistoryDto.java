@@ -6,9 +6,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record ProjectStatusHistoryDto(
-        UUID id,
-        ProjectStatus status,
-        LocalDate businessDate,
-        String changedBy,
-        Instant changedAt
-) {}
+                UUID id,
+                ProjectStatus status,
+                LocalDate businessDate,
+                String changedBy,
+                Instant changedAt) {
+}

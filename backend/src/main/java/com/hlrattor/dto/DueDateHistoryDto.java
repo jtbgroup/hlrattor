@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record DueDateHistoryDto(
-        UUID id,
-        LocalDate dueDate,
-        String changedBy,
-        Instant changedAt
-) {}
+                UUID id,
+                LocalDate dueDate,
+                String changedBy,
+                Instant changedAt) {
+}

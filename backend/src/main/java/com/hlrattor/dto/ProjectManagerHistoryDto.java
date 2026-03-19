@@ -5,10 +5,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record ProjectManagerHistoryDto(
-        UUID id,
-        String projectManager,
-        LocalDate startDate,
-        LocalDate endDate,
-        String assignedBy,
-        Instant assignedAt
-) {}
+                UUID id,
+                String projectManager,
+                LocalDate startDate,
+                LocalDate endDate,
+                String assignedBy,
+                Instant assignedAt) {
+}

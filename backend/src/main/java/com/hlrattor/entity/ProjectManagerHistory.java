@@ -41,22 +41,51 @@ public class ProjectManagerHistory {
 
     // Getters & Setters
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Project getProject() {
+        return project;
+    }
 
-    public AppUser getProjectManager() { return projectManager; }
-    public void setProjectManager(AppUser projectManager) { this.projectManager = projectManager; }
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public AppUser getProjectManager() {
+        return projectManager;
+    }
 
-    public LocalDate getEndDate() { return endDate; }
-    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    public void setProjectManager(AppUser projectManager) {
+        this.projectManager = projectManager;
+    }
 
-    public AppUser getAssignedBy() { return assignedBy; }
-    public void setAssignedBy(AppUser assignedBy) { this.assignedBy = assignedBy; }
+    public LocalDate getStartDate() {
+        return startDate;
+    }
 
-    public Instant getAssignedAt() { return assignedAt; }
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public AppUser getAssignedBy() {
+        return assignedBy;
+    }
+
+    public void setAssignedBy(AppUser assignedBy) {
+        this.assignedBy = assignedBy;
+    }
+
+    public Instant getAssignedAt() {
+        return assignedAt;
+    }
 }

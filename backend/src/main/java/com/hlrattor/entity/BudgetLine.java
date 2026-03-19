@@ -57,30 +57,71 @@ public class BudgetLine {
 
     // Getters & Setters
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public Project getProject() { return project; }
-    public void setProject(Project project) { this.project = project; }
+    public Project getProject() {
+        return project;
+    }
 
-    public BudgetLineType getType() { return type; }
-    public void setType(BudgetLineType type) { this.type = type; }
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public BudgetLineType getType() {
+        return type;
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public void setType(BudgetLineType type) {
+        this.type = type;
+    }
 
-    public String getPordReference() { return pordReference; }
-    public void setPordReference(String pordReference) { this.pordReference = pordReference; }
+    public BigDecimal getAmount() {
+        return amount;
+    }
 
-    public AppUser getCreatedBy() { return createdBy; }
-    public void setCreatedBy(AppUser createdBy) { this.createdBy = createdBy; }
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
+    public LocalDate getDate() {
+        return date;
+    }
 
-    public AppUser getUpdatedBy() { return updatedBy; }
-    public void setUpdatedBy(AppUser updatedBy) { this.updatedBy = updatedBy; }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-    public Instant getUpdatedAt() { return updatedAt; }
+    public String getPordReference() {
+        return pordReference;
+    }
+
+    public void setPordReference(String pordReference) {
+        this.pordReference = pordReference;
+    }
+
+    public AppUser getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(AppUser createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public AppUser getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(AppUser updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

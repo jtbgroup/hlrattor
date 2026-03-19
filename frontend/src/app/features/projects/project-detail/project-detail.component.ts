@@ -10,6 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectService } from '../../../core/services/project.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import {
   BudgetLineEntry,
   DueDateHistoryEntry,
@@ -30,6 +32,7 @@ import { DueDateDialogComponent, DueDateDialogData } from '../dialogs/due-date-d
     CommonModule,
     MatButtonModule, MatIconModule,
     MatDialogModule, MatSnackBarModule, MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './project-detail.component.html',
   styleUrls: ['./project-detail.component.scss'],
@@ -50,6 +53,7 @@ export class ProjectDetailComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly userService    = inject(UserService);
   private readonly authService    = inject(AuthService);
+  private readonly i18n           = inject(I18nService);
   private readonly dialog         = inject(MatDialog);
   private readonly snackBar       = inject(MatSnackBar);
 
@@ -95,9 +99,9 @@ export class ProjectDetailComponent implements OnInit {
         next: p => {
           this.project    = p;
           this.isReadOnly = READ_ONLY_STATUSES.includes(p.currentStatus);
-          this.snackBar.open('Status updated', 'Close', { duration: 3000 });
+          this.snack('projectDetail.statusUpdated');
         },
-        error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+        error: err => this.snackError(err),
       });
     });
   }
@@ -114,8 +118,8 @@ export class ProjectDetailComponent implements OnInit {
     ref.afterClosed().subscribe((result: PmDialogResult | null) => {
       if (!result) return;
       this.projectService.changeProjectManager(this.project.id, { projectManagerId: result.projectManagerId }).subscribe({
-        next: p => { this.project = p; this.snackBar.open('Project manager updated', 'Close', { duration: 3000 }); },
-        error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+        next: p => { this.project = p; this.snack('projectDetail.pmUpdated'); },
+        error: err => this.snackError(err),
       });
     });
   }
@@ -128,8 +132,8 @@ export class ProjectDetailComponent implements OnInit {
     ref.afterClosed().subscribe(payload => {
       if (!payload) return;
       this.projectService.changeDueDate(this.project.id, payload).subscribe({
-        next: p => { this.project = p; this.snackBar.open('Due date updated', 'Close', { duration: 3000 }); },
-        error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+        next: p => { this.project = p; this.snack('projectDetail.dueDateUpdated'); },
+        error: err => this.snackError(err),
       });
     });
   }
@@ -137,21 +141,37 @@ export class ProjectDetailComponent implements OnInit {
   // ── History delete ────────────────────────────────────────────────────────
 
   deleteStatusEntry(h: ProjectStatusHistoryEntry): void {
-    if (!confirm(`Delete status entry "${h.status}" (${h.businessDate})?`)) return;
-    // TODO: wire to DELETE /api/projects/:id/status/:historyId when available
-    this.snackBar.open('History deletion not yet supported by the API', 'Close', { duration: 4000 });
+    const msg = this.i18n.translate('projectDetail.confirmDeleteStatus')
+      .replace('{{status}}', h.status)
+      .replace('{{date}}', h.businessDate);
+    if (!confirm(msg)) return;
+    this.snackBar.open(
+      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
+      this.i18n.translate('projectDetail.close'),
+      { duration: 4000 }
+    );
   }
 
   deletePmEntry(h: ProjectManagerHistoryEntry): void {
-    if (!confirm(`Delete PM entry "${h.projectManager}"?`)) return;
-    // TODO: wire to DELETE /api/projects/:id/project-manager/:historyId when available
-    this.snackBar.open('History deletion not yet supported by the API', 'Close', { duration: 4000 });
+    const msg = this.i18n.translate('projectDetail.confirmDeletePm')
+      .replace('{{pm}}', h.projectManager);
+    if (!confirm(msg)) return;
+    this.snackBar.open(
+      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
+      this.i18n.translate('projectDetail.close'),
+      { duration: 4000 }
+    );
   }
 
   deleteDueDateEntry(h: DueDateHistoryEntry): void {
-    if (!confirm(`Delete due date entry "${h.dueDate}"?`)) return;
-    // TODO: wire to DELETE /api/projects/:id/due-date/:historyId when available
-    this.snackBar.open('History deletion not yet supported by the API', 'Close', { duration: 4000 });
+    const msg = this.i18n.translate('projectDetail.confirmDeleteDueDate')
+      .replace('{{date}}', h.dueDate);
+    if (!confirm(msg)) return;
+    this.snackBar.open(
+      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
+      this.i18n.translate('projectDetail.close'),
+      { duration: 4000 }
+    );
   }
 
   // ── Budget lines ──────────────────────────────────────────────────────────
@@ -161,8 +181,8 @@ export class ProjectDetailComponent implements OnInit {
     ref.afterClosed().subscribe(payload => {
       if (!payload) return;
       this.projectService.addBudgetLine(this.project.id, payload).subscribe({
-        next: p => { this.project = p; this.snackBar.open('Budget line added', 'Close', { duration: 3000 }); },
-        error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+        next: p => { this.project = p; this.snack('projectDetail.budgetLineAdded'); },
+        error: err => this.snackError(err),
       });
     });
   }
@@ -172,21 +192,39 @@ export class ProjectDetailComponent implements OnInit {
     ref.afterClosed().subscribe(payload => {
       if (!payload) return;
       this.projectService.updateBudgetLine(this.project.id, line.id, payload).subscribe({
-        next: p => { this.project = p; this.snackBar.open('Budget line updated', 'Close', { duration: 3000 }); },
-        error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+        next: p => { this.project = p; this.snack('projectDetail.budgetLineUpdated'); },
+        error: err => this.snackError(err),
       });
     });
   }
 
   deleteBudgetLine(line: BudgetLineEntry): void {
-    if (!confirm(`Delete budget line of ${line.amount} €?`)) return;
+    const msg = this.i18n.translate('projectDetail.confirmDeleteBudget')
+      .replace('{{amount}}', String(line.amount));
+    if (!confirm(msg)) return;
     this.projectService.deleteBudgetLine(this.project.id, line.id).subscribe({
-      next: p => { this.project = p; this.snackBar.open('Budget line deleted', 'Close', { duration: 3000 }); },
-      error: err => this.snackBar.open(err.error?.message ?? 'Error', 'Close', { duration: 4000 }),
+      next: p => { this.project = p; this.snack('projectDetail.budgetLineDeleted'); },
+      error: err => this.snackError(err),
     });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  private snack(key: string): void {
+    this.snackBar.open(
+      this.i18n.translate(key),
+      this.i18n.translate('projectDetail.close'),
+      { duration: 3000 }
+    );
+  }
+
+  private snackError(err: { error?: { message?: string } }): void {
+    this.snackBar.open(
+      err.error?.message ?? this.i18n.translate('projectDetail.error'),
+      this.i18n.translate('projectDetail.close'),
+      { duration: 4000 }
+    );
+  }
 
   private pmIdByUsername(username: string): string | undefined {
     return this.projectManagers.find(pm => pm.username === username)?.id;

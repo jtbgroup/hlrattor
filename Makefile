@@ -129,7 +129,7 @@ quality: quality-backend quality-frontend
 
 quality-backend:
 	@echo "🔎 Backend quality checks (Checkstyle)..."
-	cd backend && mvn --batch-mode -q checkstyle:check 2>/dev/null || echo "⚠️  Checkstyle not configured"
+	cd backend && mvn --batch-mode checkstyle:check || true
 
 quality-frontend:
 	@echo "🔎 Frontend quality checks (ESLint + TypeScript)..."

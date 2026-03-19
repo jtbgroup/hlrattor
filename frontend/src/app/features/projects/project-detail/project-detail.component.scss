@@ -55,8 +55,6 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
-
-
 // ── Info grid (panneau 1) ─────────────────────────────────────────────────────
 
 .info-grid {
@@ -118,23 +116,9 @@
 .state-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
 
   .field { flex: 1; }
-
-  button.mat-mdc-icon-button {
-    --mat-icon-button-state-layer-size: 28px;
-    width: 28px;
-    height: 28px;
-    line-height: 28px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    mat-icon { font-size: 16px; width: 16px; height: 16px; line-height: 16px; }
-  }
 }
 
 // ── Status badges ─────────────────────────────────────────────────────────────

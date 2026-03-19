@@ -7,12 +7,12 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record CreateProjectDto(
-        @NotBlank String name,
-        @NotBlank String reference,
-        @NotBlank String sciformaCode,
-        String pordBia,
-        String pordProject,
-        @NotNull UUID projectManagerId,
-        @NotNull ProjectStatus initialStatus,
-        @NotNull LocalDate statusDate
-) {}
+                @NotBlank String name,
+                @NotBlank String reference,
+                @NotBlank String sciformaCode,
+                String pordBia,
+                String pordProject,
+                @NotNull UUID projectManagerId,
+                @NotNull ProjectStatus initialStatus,
+                @NotNull LocalDate statusDate) {
+}

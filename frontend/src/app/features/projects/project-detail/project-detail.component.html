@@ -1,5 +1,5 @@
 @if (loading) {
-  <div class="loading">Loading…</div>
+  <div class="loading">{{ 'projectDetail.loading' | translate }}</div>
 }
 
 @if (!loading && project) {
@@ -17,7 +17,7 @@
     @if (canEdit && !isReadOnly) {
       <button mat-stroked-button (click)="goToEdit()">
         <mat-icon>edit</mat-icon>
-        Edit
+        {{ 'projectDetail.edit' | translate }}
       </button>
     }
   </div>
@@ -25,7 +25,7 @@
   @if (isReadOnly) {
     <div class="readonly-banner">
       <mat-icon>lock</mat-icon>
-      This project is <strong>{{ project.currentStatus }}</strong>. Change its status to edit it.
+      {{ 'projectDetail.readonlyBanner' | translate }}
     </div>
   }
 
@@ -37,25 +37,25 @@
 
       <!-- Colonne gauche -->
       <div class="info-col">
-        <p class="section-title">General</p>
+        <p class="section-title">{{ 'projectDetail.panelGeneral' | translate }}</p>
         <div class="field">
-          <span class="label">Reference</span>
+          <span class="label">{{ 'projectDetail.fieldReference' | translate }}</span>
           <span class="value">{{ project.reference }}</span>
         </div>
         <div class="field">
-          <span class="label">Name</span>
+          <span class="label">{{ 'projectDetail.fieldName' | translate }}</span>
           <span class="value">{{ project.name }}</span>
         </div>
         <div class="field">
-          <span class="label">Sciforma Code</span>
+          <span class="label">{{ 'projectDetail.fieldSciformaCode' | translate }}</span>
           <span class="value">{{ project.sciformaCode || '—' }}</span>
         </div>
         <div class="field">
-          <span class="label">PORD BIA</span>
+          <span class="label">{{ 'projectDetail.fieldPordBia' | translate }}</span>
           <span class="value">{{ project.pordBia ?? '—' }}</span>
         </div>
         <div class="field">
-          <span class="label">PORD Project</span>
+          <span class="label">{{ 'projectDetail.fieldPordProject' | translate }}</span>
           <span class="value">{{ project.pordProject ?? '—' }}</span>
         </div>
       </div>
@@ -64,17 +64,17 @@
 
       <!-- Colonne droite : état courant -->
       <div class="info-col">
-        <p class="section-title">Current State</p>
+        <p class="section-title">{{ 'projectDetail.panelCurrentState' | translate }}</p>
 
         <div class="state-row">
           <div class="field">
-            <span class="label">Status</span>
+            <span class="label">{{ 'projectDetail.fieldStatus' | translate }}</span>
             <span class="status-badge status-{{ project.currentStatus | lowercase }}">
               {{ project.currentStatus }}
             </span>
           </div>
           @if (canEdit) {
-            <button mat-icon-button matTooltip="Change status" (click)="openStatusDialog()">
+            <button mat-icon-button [matTooltip]="'projectDetail.tooltipChangeStatus' | translate" (click)="openStatusDialog()">
               <mat-icon>edit</mat-icon>
             </button>
           }
@@ -82,11 +82,11 @@
 
         <div class="state-row">
           <div class="field">
-            <span class="label">Project Manager</span>
+            <span class="label">{{ 'projectDetail.fieldProjectManager' | translate }}</span>
             <span class="value">{{ project.currentProjectManager ?? '—' }}</span>
           </div>
           @if (isAdmin && !isReadOnly) {
-            <button mat-icon-button matTooltip="Change project manager" (click)="openPmDialog()">
+            <button mat-icon-button [matTooltip]="'projectDetail.tooltipChangePm' | translate" (click)="openPmDialog()">
               <mat-icon>edit</mat-icon>
             </button>
           }
@@ -94,18 +94,18 @@
 
         <div class="state-row">
           <div class="field">
-            <span class="label">Due Date</span>
+            <span class="label">{{ 'projectDetail.fieldDueDate' | translate }}</span>
             <span class="value">{{ project.currentDueDate ?? '—' }}</span>
           </div>
           @if (canEdit && !isReadOnly) {
-            <button mat-icon-button matTooltip="Set due date" (click)="openDueDateDialog()">
+            <button mat-icon-button [matTooltip]="'projectDetail.tooltipSetDueDate' | translate" (click)="openDueDateDialog()">
               <mat-icon>edit</mat-icon>
             </button>
           }
         </div>
 
         <div class="field">
-          <span class="label">Total Budget</span>
+          <span class="label">{{ 'projectDetail.fieldTotalBudget' | translate }}</span>
           <span class="value budget-total">{{ project.totalBudget | number:'1.2-2' }} €</span>
         </div>
       </div>
@@ -118,9 +118,9 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="section-card">
     <div class="section-header">
-      <span class="section-title">Budget</span>
+      <span class="section-title">{{ 'projectDetail.panelBudget' | translate }}</span>
       @if (canEdit && !isReadOnly) {
-        <button mat-icon-button matTooltip="Add budget line" (click)="openAddBudgetLine()">
+        <button mat-icon-button [matTooltip]="'projectDetail.addBudgetLine' | translate" (click)="openAddBudgetLine()">
           <mat-icon>add</mat-icon>
         </button>
       }
@@ -129,9 +129,9 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th>Type</th>
-          <th>Amount (€)</th>
-          <th>Comment</th>
+          <th>{{ 'projectDetail.budgetColType' | translate }}</th>
+          <th>{{ 'projectDetail.budgetColAmount' | translate }}</th>
+          <th>{{ 'projectDetail.budgetColComment' | translate }}</th>
           @if (canEdit && !isReadOnly) { <th></th> }
         </tr>
       </thead>
@@ -143,10 +143,10 @@
             <td>{{ line.pordReference ?? '—' }}</td>
             @if (canEdit && !isReadOnly) {
               <td class="actions-cell">
-                <button mat-icon-button (click)="openEditBudgetLine(line)" matTooltip="Edit">
+                <button mat-icon-button (click)="openEditBudgetLine(line)" [matTooltip]="'projectDetail.tooltipEdit' | translate">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteBudgetLine(line)" matTooltip="Delete">
+                <button mat-icon-button color="warn" (click)="deleteBudgetLine(line)" [matTooltip]="'projectDetail.tooltipDelete' | translate">
                   <mat-icon>delete</mat-icon>
                 </button>
               </td>
@@ -154,7 +154,9 @@
           </tr>
         } @empty {
           <tr>
-            <td [attr.colspan]="(canEdit && !isReadOnly) ? 4 : 3" class="table-empty">No budget lines yet.</td>
+            <td [attr.colspan]="(canEdit && !isReadOnly) ? 4 : 3" class="table-empty">
+              {{ 'projectDetail.budgetEmpty' | translate }}
+            </td>
           </tr>
         }
       </tbody>
@@ -166,20 +168,20 @@
   ══════════════════════════════════════════════════════════════ -->
   <div class="section-card">
     <div class="section-header">
-      <span class="section-title">History</span>
+      <span class="section-title">{{ 'projectDetail.panelHistory' | translate }}</span>
     </div>
 
     <div class="history-panels">
 
       <!-- Status history -->
       <div class="history-block">
-        <p class="history-block-title">Status</p>
+        <p class="history-block-title">{{ 'projectDetail.historyStatus' | translate }}</p>
         <table class="data-table">
           <thead>
             <tr>
-              <th>Status</th>
-              <th>Date</th>
-              <th>By</th>
+              <th>{{ 'projectDetail.historyColStatus' | translate }}</th>
+              <th>{{ 'projectDetail.historyColDate' | translate }}</th>
+              <th>{{ 'projectDetail.historyColBy' | translate }}</th>
               @if (canEdit) { <th></th> }
             </tr>
           </thead>
@@ -191,17 +193,17 @@
                 <td>{{ h.changedBy }}</td>
                 @if (canEdit) {
                   <td class="actions-cell">
-                    <button mat-icon-button matTooltip="Edit" (click)="openStatusDialog(h)">
+                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openStatusDialog(h)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteStatusEntry(h)">
+                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deleteStatusEntry(h)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>
                 }
               </tr>
             } @empty {
-              <tr><td colspan="4" class="table-empty">No history.</td></tr>
+              <tr><td colspan="4" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
             }
           </tbody>
         </table>
@@ -209,13 +211,13 @@
 
       <!-- PM history -->
       <div class="history-block">
-        <p class="history-block-title">Project Manager</p>
+        <p class="history-block-title">{{ 'projectDetail.historyPm' | translate }}</p>
         <table class="data-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>From</th>
-              <th>To</th>
+              <th>{{ 'projectDetail.historyColName' | translate }}</th>
+              <th>{{ 'projectDetail.historyColFrom' | translate }}</th>
+              <th>{{ 'projectDetail.historyColTo' | translate }}</th>
               @if (isAdmin) { <th></th> }
             </tr>
           </thead>
@@ -224,20 +226,20 @@
               <tr>
                 <td>{{ h.projectManager }}</td>
                 <td>{{ h.startDate }}</td>
-                <td>{{ h.endDate ?? 'Current' }}</td>
+                <td>{{ h.endDate ?? ('projectDetail.historyCurrent' | translate) }}</td>
                 @if (isAdmin) {
                   <td class="actions-cell">
-                    <button mat-icon-button matTooltip="Edit" (click)="openPmDialog(h)">
+                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openPmDialog(h)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button mat-icon-button color="warn" matTooltip="Delete" (click)="deletePmEntry(h)">
+                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deletePmEntry(h)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>
                 }
               </tr>
             } @empty {
-              <tr><td colspan="4" class="table-empty">No history.</td></tr>
+              <tr><td colspan="4" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
             }
           </tbody>
         </table>
@@ -245,12 +247,12 @@
 
       <!-- Due date history -->
       <div class="history-block">
-        <p class="history-block-title">Due Date</p>
+        <p class="history-block-title">{{ 'projectDetail.historyDueDate' | translate }}</p>
         <table class="data-table">
           <thead>
             <tr>
-              <th>Due Date</th>
-              <th>By</th>
+              <th>{{ 'projectDetail.historyColDueDate' | translate }}</th>
+              <th>{{ 'projectDetail.historyColBy' | translate }}</th>
               @if (canEdit) { <th></th> }
             </tr>
           </thead>
@@ -261,17 +263,17 @@
                 <td>{{ h.changedBy }}</td>
                 @if (canEdit) {
                   <td class="actions-cell">
-                    <button mat-icon-button matTooltip="Edit" (click)="openDueDateDialog(h)">
+                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openDueDateDialog(h)">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteDueDateEntry(h)">
+                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deleteDueDateEntry(h)">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </td>
                 }
               </tr>
             } @empty {
-              <tr><td colspan="3" class="table-empty">No history.</td></tr>
+              <tr><td colspan="3" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
             }
           </tbody>
         </table>

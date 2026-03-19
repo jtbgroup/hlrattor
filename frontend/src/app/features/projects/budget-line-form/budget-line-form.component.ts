@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -26,24 +26,22 @@ export interface BudgetLineDialogData {
   styleUrls: ['./budget-line-form.component.scss'],
 })
 export class BudgetLineFormComponent implements OnInit {
+  private readonly fb        = inject(FormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<BudgetLineFormComponent>);
+  readonly data              = inject<BudgetLineDialogData>(MAT_DIALOG_DATA);
+
   form!: FormGroup;
   readonly types = BUDGET_LINE_TYPES;
   isEdit = false;
-
-  constructor(
-    private fb: FormBuilder,
-    private dialogRef: MatDialogRef<BudgetLineFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: BudgetLineDialogData,
-  ) {}
 
   ngOnInit(): void {
     this.isEdit = !!this.data?.line;
     const line = this.data?.line;
 
     this.form = this.fb.group({
-      type: [line?.type ?? '', Validators.required],
-      amount: [line?.amount ?? null, [Validators.required, Validators.min(0)]],
-      date: [line?.date ? new Date(line.date) : '', Validators.required],
+      type:          [line?.type ?? '', Validators.required],
+      amount:        [line?.amount ?? null, [Validators.required, Validators.min(0)]],
+      date:          [line?.date ? new Date(line.date) : '', Validators.required],
       pordReference: [line?.pordReference ?? ''],
     });
   }

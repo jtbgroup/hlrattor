@@ -60,7 +60,9 @@ public class Project {
     // Derived helpers
 
     public ProjectStatus currentStatus() {
-        if (statusHistory.isEmpty()) return null;
+        if (statusHistory.isEmpty()) {
+            return null;
+        }
         return statusHistory.get(statusHistory.size() - 1).getStatus();
     }
 
@@ -79,30 +81,75 @@ public class Project {
 
     // Getters & Setters
 
-    public UUID getId() { return id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
 
-    public String getReference() { return reference; }
-    public void setReference(String reference) { this.reference = reference; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getSciformaCode() { return sciformaCode; }
-    public void setSciformaCode(String sciformaCode) { this.sciformaCode = sciformaCode; }
+    public String getReference() {
+        return reference;
+    }
 
-    public String getPordBia() { return pordBia; }
-    public void setPordBia(String pordBia) { this.pordBia = pordBia; }
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
 
-    public String getPordProject() { return pordProject; }
-    public void setPordProject(String pordProject) { this.pordProject = pordProject; }
+    public String getSciformaCode() {
+        return sciformaCode;
+    }
 
-    public AppUser getCreatedBy() { return createdBy; }
-    public void setCreatedBy(AppUser createdBy) { this.createdBy = createdBy; }
+    public void setSciformaCode(String sciformaCode) {
+        this.sciformaCode = sciformaCode;
+    }
 
-    public Instant getCreatedAt() { return createdAt; }
+    public String getPordBia() {
+        return pordBia;
+    }
 
-    public List<ProjectStatusHistory> getStatusHistory() { return statusHistory; }
-    public List<ProjectManagerHistory> getManagerHistory() { return managerHistory; }
-    public List<DueDateHistory> getDueDateHistory() { return dueDateHistory; }
-    public List<BudgetLine> getBudgetLines() { return budgetLines; }
+    public void setPordBia(String pordBia) {
+        this.pordBia = pordBia;
+    }
+
+    public String getPordProject() {
+        return pordProject;
+    }
+
+    public void setPordProject(String pordProject) {
+        this.pordProject = pordProject;
+    }
+
+    public AppUser getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(AppUser createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<ProjectStatusHistory> getStatusHistory() {
+        return statusHistory;
+    }
+
+    public List<ProjectManagerHistory> getManagerHistory() {
+        return managerHistory;
+    }
+
+    public List<DueDateHistory> getDueDateHistory() {
+        return dueDateHistory;
+    }
+
+    public List<BudgetLine> getBudgetLines() {
+        return budgetLines;
+    }
 }

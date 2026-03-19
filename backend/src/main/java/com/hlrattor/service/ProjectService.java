@@ -24,8 +24,8 @@ public class ProjectService {
     private final AppUserRepository userRepository;
 
     public ProjectService(ProjectRepository projectRepository,
-                          BudgetLineRepository budgetLineRepository,
-                          AppUserRepository userRepository) {
+            BudgetLineRepository budgetLineRepository,
+            AppUserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.budgetLineRepository = budgetLineRepository;
         this.userRepository = userRepository;
@@ -103,7 +103,9 @@ public class ProjectService {
         boolean isAdmin = hasRole(actor, AppUser.Role.ADMIN);
 
         if (isAdmin) {
-            if (dto.name() != null) project.setName(dto.name());
+            if (dto.name() != null) {
+                project.setName(dto.name());
+            }
             if (dto.reference() != null) {
                 if (projectRepository.existsByReferenceAndIdNot(dto.reference(), id)) {
                     throw new ResponseStatusException(HttpStatus.CONFLICT, "Project reference already exists");
@@ -113,9 +115,15 @@ public class ProjectService {
         }
 
         // Both ADMIN and assigned PM can update these
-        if (dto.sciformaCode() != null) project.setSciformaCode(dto.sciformaCode());
-        if (dto.pordBia() != null) project.setPordBia(dto.pordBia());
-        if (dto.pordProject() != null) project.setPordProject(dto.pordProject());
+        if (dto.sciformaCode() != null) {
+            project.setSciformaCode(dto.sciformaCode());
+        }
+        if (dto.pordBia() != null) {
+            project.setPordBia(dto.pordBia());
+        }
+        if (dto.pordProject() != null) {
+            project.setPordProject(dto.pordProject());
+        }
 
         projectRepository.save(project);
         return toDetailDto(project);
@@ -282,8 +290,7 @@ public class ProjectService {
                 p.currentStatus(),
                 pm != null ? pm.getUsername() : null,
                 currentDueDate,
-                total
-        );
+                total);
     }
 
     private ProjectDetailDto toDetailDto(Project p) {
@@ -332,8 +339,7 @@ public class ProjectService {
                 p.currentStatus(),
                 pm != null ? pm.getUsername() : null,
                 currentDueDate, total,
-                statusHistory, managerHistory, dueDateHistory, budgetLines
-        );
+                statusHistory, managerHistory, dueDateHistory, budgetLines);
     }
 
     // -------------------------------------------------------------------------
@@ -348,9 +354,13 @@ public class ProjectService {
     }
 
     private void assertCanEdit(Project project, AppUser actor) {
-        if (hasRole(actor, AppUser.Role.ADMIN)) return;
+        if (hasRole(actor, AppUser.Role.ADMIN)) {
+            return;
+        }
         AppUser currentPm = project.currentProjectManager();
-        if (currentPm != null && currentPm.getId().equals(actor.getId())) return;
+        if (currentPm != null && currentPm.getId().equals(actor.getId())) {
+            return;
+        }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                 "You are not authorized to edit this project");
     }
