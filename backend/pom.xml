@@ -14,7 +14,7 @@
     <groupId>com.hlrattor</groupId>
     <artifactId>hlrattor-backend</artifactId>
     <!-- Version is managed via the VERSION file at the root and updated by: make set-version -->
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <name>hlrattor-backend</name>
     <description>hlrattor Backend</description>
 
