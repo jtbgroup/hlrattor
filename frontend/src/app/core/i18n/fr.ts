@@ -88,11 +88,31 @@ export const fr: TranslationKeys = {
     viewDetail: 'Voir le détail',
   },
 
+  // ── Project Form (création / édition) ────────────────────────────────────
+  projectForm: {
+    titleCreate: 'Nouveau projet',
+    titleEdit: 'Modifier le projet',
+    draftNotice: "Tout nouveau projet démarre avec le statut BROUILLON, daté d'aujourd'hui.",
+    fieldName: 'Nom',
+    fieldSciformaCode: 'Code Sciforma',
+    fieldPordBia: 'PORD BIA',
+    fieldPordProject: 'PORD Projet',
+    fieldProjectManager: 'Chef de projet',
+    errorNameRequired: 'Le nom est requis',
+    errorPmRequired: 'Le chef de projet est requis',
+    errorLoad: "Impossible d'enregistrer le projet. Veuillez réessayer.",
+    cancel: 'Annuler',
+    save: 'Enregistrer',
+    create: 'Créer le projet',
+    saving: 'Enregistrement…',
+    loading: 'Chargement…',
+  },
+
   // ── Project Detail ───────────────────────────────────────────────────────────
   projectDetail: {
     loading: 'Chargement…',
     edit: 'Modifier',
-    readonlyBanner: 'Ce projet est {{status}}. Changez son statut pour le modifier.',
+    readonlyBanner: 'Ce projet est clôturé. Changez son statut pour le modifier.',
     // Panels
     panelGeneral: 'Général',
     panelCurrentState: 'État courant',
@@ -123,7 +143,7 @@ export const fr: TranslationKeys = {
     historyColBy: 'Par',
     historyColName: 'Nom',
     historyColFrom: 'Depuis',
-    historyColTo: 'Jusqu\'à',
+    historyColTo: "Jusqu'à",
     historyColDueDate: 'Échéance',
     historyCurrent: 'En cours',
     historyEmpty: 'Aucun historique.',
@@ -148,26 +168,6 @@ export const fr: TranslationKeys = {
     confirmDeleteDueDate: 'Supprimer l\'entrée échéance "{{date}}" ?',
     close: 'Fermer',
     error: 'Erreur',
-  },
-
-  // ── Project Form ─────────────────────────────────────────────────────────────
-  projectForm: {
-    titleCreate: 'Nouveau projet',
-    titleEdit: 'Modifier le projet',
-    draftNotice: 'Tout nouveau projet démarre avec le statut BROUILLON, daté d\'aujourd\'hui.',
-    fieldName: 'Nom',
-    fieldSciformaCode: 'Code Sciforma',
-    fieldPordBia: 'PORD BIA',
-    fieldPordProject: 'PORD Projet',
-    fieldProjectManager: 'Chef de projet',
-    errorNameRequired: 'Le nom est requis',
-    errorPmRequired: 'Le chef de projet est requis',
-    errorLoad: 'Impossible de charger les projets.',
-    cancel: 'Annuler',
-    save: 'Enregistrer',
-    create: 'Créer le projet',
-    saving: 'Enregistrement…',
-    loading: 'Chargement…',
   },
 
   // ── Languages ───────────────────────────────────────────────────────────────

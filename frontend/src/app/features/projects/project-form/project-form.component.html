@@ -1,94 +1,123 @@
 <div class="page-header">
-  <h2 class="page-title">{{ 'projectForm.title' | translate }}</h2>
-  @if (isAdmin) {
-    <button mat-flat-button class="btn-create" (click)="goToCreate()">
-      <mat-icon>add</mat-icon>
-      {{ 'projectForm.newProject' | translate }}
-    </button>
-  }
+  <button mat-icon-button class="btn-back" (click)="cancel()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <h2 class="page-title">
+    {{ (isEdit ? 'projectForm.titleEdit' : 'projectForm.titleCreate') | translate }}
+  </h2>
 </div>
 
-@if (error) {
-  <div class="list-error">{{ error }}</div>
+@if (loading) {
+  <div class="loading">{{ 'projectForm.loading' | translate }}</div>
 }
 
-<!-- Filters -->
-<div class="filters">
-  <mat-form-field appearance="outline">
-    <mat-label>{{ 'projectForm.filterStatus' | translate }}</mat-label>
-    <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
-      <mat-option value="">{{ 'projectForm.filterStatusAll' | translate }}</mat-option>
-      @for (s of statuses; track s) {
-        <mat-option [value]="s">{{ s }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+@if (!loading) {
 
-  <mat-form-field appearance="outline">
-    <mat-label>{{ 'projectForm.filterPm' | translate }}</mat-label>
-    <input matInput [(ngModel)]="filterPm" (ngModelChange)="applyFilter()"
-           [placeholder]="'projectForm.filterPmPlaceholder' | translate" />
-  </mat-form-field>
-</div>
-
-<!-- Table -->
-<div class="table-card">
-  @if (filtered.length) {
-    <table mat-table [dataSource]="filtered" class="project-table">
-
-      <ng-container matColumnDef="reference">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colReference' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.reference }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colName' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="currentStatus">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colStatus' | translate }}</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="status-badge status-{{ row.currentStatus | lowercase }}">
-            {{ row.currentStatus }}
-          </span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="currentProjectManager">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colProjectManager' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="currentDueDate">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colDueDate' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="totalBudget">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectForm.colTotalBudget' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="goToDetail(row)" [matTooltip]="'projectForm.viewDetail' | translate">
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-          class="clickable-row"
-          (click)="goToDetail(row)">
-      </tr>
-    </table>
-  } @else {
-    <div class="empty-state">
-      <mat-icon class="empty-icon">folder_open</mat-icon>
-      <p>{{ 'projectForm.noProjects' | translate }}</p>
+  @if (!isEdit) {
+    <div class="draft-notice">
+      <mat-icon>info_outline</mat-icon>
+      <span>{{ 'projectForm.draftNotice' | translate }}</span>
     </div>
   }
-</div>
+
+  @if (isReadOnly) {
+    <div class="draft-notice" style="background:#fff3e0;color:#e65100;border-left-color:#e65100;">
+      <mat-icon>lock</mat-icon>
+      <span>{{ 'projectDetail.readonlyBanner' | translate }}</span>
+    </div>
+  }
+
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="project-form">
+
+      <!-- Name -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'projectForm.fieldName' | translate }} *</mat-label>
+        <input matInput formControlName="name" />
+        @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+          <mat-error>{{ 'projectForm.errorNameRequired' | translate }}</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Reference -->
+      <mat-form-field appearance="outline">
+        <mat-label>Reference *</mat-label>
+        <input matInput formControlName="reference" />
+        @if (form.get('reference')?.hasError('required') && form.get('reference')?.touched) {
+          <mat-error>Reference is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Sciforma Code -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'projectForm.fieldSciformaCode' | translate }} *</mat-label>
+        <input matInput formControlName="sciformaCode" />
+      </mat-form-field>
+
+      <!-- PORD BIA -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'projectForm.fieldPordBia' | translate }}</mat-label>
+        <input matInput formControlName="pordBia" />
+      </mat-form-field>
+
+      <!-- PORD Project -->
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'projectForm.fieldPordProject' | translate }}</mat-label>
+        <input matInput formControlName="pordProject" />
+      </mat-form-field>
+
+      <!-- Creation-only fields -->
+      @if (!isEdit) {
+
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'projectForm.fieldProjectManager' | translate }} *</mat-label>
+          <mat-select formControlName="projectManagerId">
+            @for (pm of projectManagers; track pm.id) {
+              <mat-option [value]="pm.id">{{ pm.username }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('projectManagerId')?.hasError('required') && form.get('projectManagerId')?.touched) {
+            <mat-error>{{ 'projectForm.errorPmRequired' | translate }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Initial Status</mat-label>
+          <mat-select formControlName="initialStatus">
+            @for (s of statuses; track s) {
+              <mat-option [value]="s">{{ s }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status Date</mat-label>
+          <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate" />
+          <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
+          <mat-datepicker #statusDatePicker></mat-datepicker>
+        </mat-form-field>
+
+      }
+
+      @if (error) {
+        <div class="form-error">{{ error }}</div>
+      }
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="saving">
+          {{ 'projectForm.cancel' | translate }}
+        </button>
+        <button mat-flat-button class="btn-save" type="submit"
+                [disabled]="form.invalid || saving || isReadOnly">
+          @if (saving) {
+            <mat-spinner diameter="18" />
+          } @else {
+            {{ (isEdit ? 'projectForm.save' : 'projectForm.create') | translate }}
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+}

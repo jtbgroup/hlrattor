@@ -1,9 +1,9 @@
 <div class="page-header">
-  <h2 class="page-title">Projects</h2>
+  <h2 class="page-title">{{ 'projectList.title' | translate }}</h2>
   @if (isAdmin) {
     <button mat-flat-button class="btn-create" (click)="goToCreate()">
       <mat-icon>add</mat-icon>
-      New project
+      {{ 'projectList.newProject' | translate }}
     </button>
   }
 </div>
@@ -15,9 +15,9 @@
 <!-- Filters -->
 <div class="filters">
   <mat-form-field appearance="outline">
-    <mat-label>Status</mat-label>
+    <mat-label>{{ 'projectList.filterStatus' | translate }}</mat-label>
     <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
-      <mat-option value="">All</mat-option>
+      <mat-option value="">{{ 'projectList.filterStatusAll' | translate }}</mat-option>
       @for (s of statuses; track s) {
         <mat-option [value]="s">{{ s }}</mat-option>
       }
@@ -25,8 +25,9 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline">
-    <mat-label>Project Manager</mat-label>
-    <input matInput [(ngModel)]="filterPm" (ngModelChange)="applyFilter()" placeholder="Filter by PM" />
+    <mat-label>{{ 'projectList.filterPm' | translate }}</mat-label>
+    <input matInput [(ngModel)]="filterPm" (ngModelChange)="applyFilter()"
+           [placeholder]="'projectList.filterPmPlaceholder' | translate" />
   </mat-form-field>
 </div>
 
@@ -36,17 +37,17 @@
     <table mat-table [dataSource]="filtered" class="project-table">
 
       <ng-container matColumnDef="reference">
-        <th mat-header-cell *matHeaderCellDef>Reference</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colReference' | translate }}</th>
         <td mat-cell *matCellDef="let row">{{ row.reference }}</td>
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colName' | translate }}</th>
         <td mat-cell *matCellDef="let row">{{ row.name }}</td>
       </ng-container>
 
       <ng-container matColumnDef="currentStatus">
-        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colStatus' | translate }}</th>
         <td mat-cell *matCellDef="let row">
           <span class="status-badge status-{{ row.currentStatus | lowercase }}">
             {{ row.currentStatus }}
@@ -55,24 +56,24 @@
       </ng-container>
 
       <ng-container matColumnDef="currentProjectManager">
-        <th mat-header-cell *matHeaderCellDef>Project Manager</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colProjectManager' | translate }}</th>
         <td mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="currentDueDate">
-        <th mat-header-cell *matHeaderCellDef>Due Date</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colDueDate' | translate }}</th>
         <td mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="totalBudget">
-        <th mat-header-cell *matHeaderCellDef>Total Budget</th>
+        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colTotalBudget' | translate }}</th>
         <td mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</td>
       </ng-container>
 
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="goToDetail(row)" matTooltip="View detail">
+          <button mat-icon-button (click)="goToDetail(row)" [matTooltip]="'projectList.viewDetail' | translate">
             <mat-icon>arrow_forward</mat-icon>
           </button>
         </td>
@@ -87,7 +88,7 @@
   } @else {
     <div class="empty-state">
       <mat-icon class="empty-icon">folder_open</mat-icon>
-      <p>No projects found.</p>
+      <p>{{ 'projectList.noProjects' | translate }}</p>
     </div>
   }
 </div>

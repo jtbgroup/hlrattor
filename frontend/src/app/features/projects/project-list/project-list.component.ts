@@ -16,6 +16,7 @@ import {
   ProjectStatus,
   ProjectSummary,
 } from '../../../core/models/project.model';
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 
 @Component({
   selector: 'app-project-list',
@@ -24,7 +25,7 @@ import {
     CommonModule, FormsModule,
     MatTableModule, MatButtonModule,
     MatSelectModule, MatFormFieldModule,
-    MatInputModule, MatIconModule, MatTooltipModule,
+    MatInputModule, MatIconModule, MatTooltipModule,TranslatePipe,
   ],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],

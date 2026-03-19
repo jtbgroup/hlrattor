@@ -86,11 +86,31 @@ export const en = {
     viewDetail: 'View detail',
   },
 
+  // ── Project Form (create / edit) ──────────────────────────────────────────
+  projectForm: {
+    titleCreate: 'New Project',
+    titleEdit: 'Edit Project',
+    draftNotice: 'Every new project starts with status DRAFT, dated today.',
+    fieldName: 'Name',
+    fieldSciformaCode: 'Sciforma Code',
+    fieldPordBia: 'PORD BIA',
+    fieldPordProject: 'PORD Project',
+    fieldProjectManager: 'Project Manager',
+    errorNameRequired: 'Name is required',
+    errorPmRequired: 'Project manager is required',
+    errorLoad: 'Failed to save project. Please try again.',
+    cancel: 'Cancel',
+    save: 'Save',
+    create: 'Create project',
+    saving: 'Saving…',
+    loading: 'Loading…',
+  },
+
   // ── Project Detail ───────────────────────────────────────────────────────────
   projectDetail: {
     loading: 'Loading…',
     edit: 'Edit',
-    readonlyBanner: 'This project is {{status}}. Change its status to edit it.',
+    readonlyBanner: 'This project is in a closed state. Change its status to edit it.',
     // Panels
     panelGeneral: 'General',
     panelCurrentState: 'Current State',
@@ -146,26 +166,6 @@ export const en = {
     confirmDeleteDueDate: 'Delete due date entry "{{date}}"?',
     close: 'Close',
     error: 'Error',
-  },
-
-  // ── Project Form ─────────────────────────────────────────────────────────────
-  projectForm: {
-    titleCreate: 'New Project',
-    titleEdit: 'Edit Project',
-    draftNotice: 'Every new project starts with status DRAFT, dated today.',
-    fieldName: 'Name',
-    fieldSciformaCode: 'Sciforma Code',
-    fieldPordBia: 'PORD BIA',
-    fieldPordProject: 'PORD Project',
-    fieldProjectManager: 'Project Manager',
-    errorNameRequired: 'Name is required',
-    errorPmRequired: 'Project manager is required',
-    errorLoad: 'Failed to load projects.',
-    cancel: 'Cancel',
-    save: 'Save',
-    create: 'Create project',
-    saving: 'Saving…',
-    loading: 'Loading…',
   },
 
   // ── Languages ───────────────────────────────────────────────────────────────
