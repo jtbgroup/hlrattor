@@ -5,32 +5,36 @@ echo "🚀 Starting hlrattor application..."
 
 # Validate environment variables
 if [ -z "$SPRING_PROFILES_ACTIVE" ]; then
-    echo "❌ SPRING_PROFILES_ACTIVE not set. Defaulting to 'postgres'"
-    SPRING_PROFILES_ACTIVE="postgres"
+    echo "⚠️  SPRING_PROFILES_ACTIVE not set. Defaulting to 'h2'"
+    SPRING_PROFILES_ACTIVE="h2"
 fi
 
-if [ -z "$SERVER_PORT" ]; then
-    SERVER_PORT="8090"
-fi
+# Spring Boot always runs on internal port 8081 (Nginx proxies 8090 → 8081)
+SPRING_PORT=8081
 
 echo "📋 Configuration:"
-echo "   Profile: $SPRING_PROFILES_ACTIVE"
-echo "   Port: $SERVER_PORT"
-echo "   JAVA_OPTS: $JAVA_OPTS"
+echo "   Profile:    $SPRING_PROFILES_ACTIVE"
+echo "   Public port: ${SERVER_PORT:-8090} (Nginx)"
+echo "   Backend port: $SPRING_PORT (Spring Boot)"
+echo "   JAVA_OPTS:  $JAVA_OPTS"
 
 # Start Nginx in background
 echo "📡 Starting Nginx..."
 nginx -g "daemon off;" &
 NGINX_PID=$!
 
-# Wait for Nginx to start
-sleep 2
+# Trap must be set before exec — clean up Nginx if Spring Boot exits
+cleanup() {
+    echo "🛑 Shutting down Nginx (PID $NGINX_PID)..."
+    kill "$NGINX_PID" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
 
-# Start Spring Boot
-echo "🔧 Starting Spring Boot..."
+# Wait briefly for Nginx to be ready
+sleep 1
+
+# Start Spring Boot on internal port 8081
+echo "🔧 Starting Spring Boot on port $SPRING_PORT..."
 exec java $JAVA_OPTS -jar /app/app.jar \
-    --spring.profiles.active=$SPRING_PROFILES_ACTIVE \
-    --server.port=$SERVER_PORT
-
-# Cleanup on exit
-trap "kill $NGINX_PID 2>/dev/null" EXIT
+    --spring.profiles.active="$SPRING_PROFILES_ACTIVE" \
+    --server.port="$SPRING_PORT"

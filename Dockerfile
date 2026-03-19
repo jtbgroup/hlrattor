@@ -41,25 +41,36 @@ COPY docker/nginx.prod.conf /etc/nginx/nginx.conf
 
 # Copy entrypoint script
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && chown appuser:appuser /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Copy frontend static assets
 COPY --from=frontend-builder /build/frontend/dist/hlrattor /usr/share/nginx/html
 
-# Fix permissions — nginx.pid does not exist at build time, so we prepare
-# the directory instead and let Nginx create the file at runtime
-RUN mkdir -p /var/run/nginx && \
+# Fix all permissions needed by Nginx running as non-root
+RUN mkdir -p \
+        /var/run/nginx \
+        /var/lib/nginx \
+        /var/lib/nginx/tmp \
+        /var/lib/nginx/tmp/client_body \
+        /var/lib/nginx/tmp/proxy \
+        /var/lib/nginx/tmp/fastcgi \
+        /var/lib/nginx/tmp/uwsgi \
+        /var/lib/nginx/tmp/scgi \
+        /var/log/nginx && \
     chown -R appuser:appuser \
         /app \
         /usr/share/nginx/html \
         /var/log/nginx \
-        /var/run/nginx
+        /var/run/nginx \
+        /var/lib/nginx \
+        /entrypoint.sh && \
+    chmod -R 755 /var/lib/nginx
 
 USER appuser
 
 EXPOSE 8090
 
-ENV SPRING_PROFILES_ACTIVE=postgres
+ENV SPRING_PROFILES_ACTIVE=h2
 ENV SERVER_PORT=8090
 ENV JAVA_OPTS="-Xmx1024m -Xms512m"
 
