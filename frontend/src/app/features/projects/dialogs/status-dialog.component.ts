@@ -24,7 +24,7 @@ export interface StatusDialogData {
     MatInputModule, MatButtonModule, MatDatepickerModule,
   ],
   template: `
-    <h2 mat-dialog-title>{{ data?.status ? 'Edit Status Entry' : 'Change Status' }}</h2>
+    <h2 mat-dialog-title>{{ data.status ? 'Edit Status Entry' : 'Change Status' }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="dialog-form">
         <mat-form-field appearance="outline">
@@ -62,11 +62,11 @@ export class StatusDialogComponent {
 
   form = this.fb.group({
     status:       this.fb.control<ProjectStatus | null>(
-      (this.data?.status ?? null) as ProjectStatus | null,
+      (this.data.status ?? null) as ProjectStatus | null,
       Validators.required
     ),
     businessDate: this.fb.control<Date | null>(
-      this.data?.businessDate ? new Date(this.data.businessDate) : null,
+      this.data.businessDate ? new Date(this.data.businessDate) : null,
       Validators.required
     ),
   });

@@ -16,7 +16,7 @@ WORKDIR /build/frontend
 COPY frontend/package*.json ./
 RUN npm ci --no-audit --no-fund
 
-COPY frontend . 
+COPY frontend .
 RUN npm run build
 
 # ============================================
@@ -46,8 +46,14 @@ RUN chmod +x /entrypoint.sh && chown appuser:appuser /entrypoint.sh
 # Copy frontend static assets
 COPY --from=frontend-builder /build/frontend/dist/hlrattor /usr/share/nginx/html
 
-# Fix permissions
-RUN chown -R appuser:appuser /app /usr/share/nginx/html /var/log/nginx /var/run/nginx.pid
+# Fix permissions — nginx.pid does not exist at build time, so we prepare
+# the directory instead and let Nginx create the file at runtime
+RUN mkdir -p /var/run/nginx && \
+    chown -R appuser:appuser \
+        /app \
+        /usr/share/nginx/html \
+        /var/log/nginx \
+        /var/run/nginx
 
 USER appuser
 

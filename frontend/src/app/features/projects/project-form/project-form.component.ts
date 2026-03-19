@@ -12,7 +12,6 @@ import { FormsModule } from '@angular/forms';
 import { ProjectService } from '../../../core/services/project.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { I18nService } from '../../../core/i18n/i18n.service';
-import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import {
   PROJECT_STATUSES,
   ProjectStatus,
@@ -27,7 +26,7 @@ import {
     MatTableModule, MatButtonModule,
     MatSelectModule, MatFormFieldModule,
     MatInputModule, MatIconModule, MatTooltipModule,
-    TranslatePipe,
+    
   ],
   templateUrl: '../project-list/project-list.component.html',
   styleUrls: ['../project-list/project-list.component.scss'],

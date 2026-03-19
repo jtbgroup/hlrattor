@@ -22,7 +22,7 @@ export interface DueDateDialogData {
     MatInputModule, MatButtonModule, MatDatepickerModule,
   ],
   template: `
-    <h2 mat-dialog-title>{{ data?.dueDate ? 'Edit Due Date Entry' : 'Set Due Date' }}</h2>
+    <h2 mat-dialog-title>{{ data.dueDate ? 'Edit Due Date Entry' : 'Set Due Date' }}</h2>
     <mat-dialog-content>
       <form [formGroup]="form" class="dialog-form">
         <mat-form-field appearance="outline">
@@ -50,7 +50,7 @@ export class DueDateDialogComponent {
 
   form = this.fb.group({
     dueDate: this.fb.control<Date | null>(
-      this.data?.dueDate ? new Date(this.data.dueDate) : null,
+      this.data.dueDate ? new Date(this.data.dueDate) : null,
       Validators.required
     ),
   });
