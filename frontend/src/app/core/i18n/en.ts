@@ -160,6 +160,7 @@ export const en = {
     fieldProjectManager: 'Project Manager',
     errorNameRequired: 'Name is required',
     errorPmRequired: 'Project manager is required',
+    errorLoad: 'Failed to load projects.',
     cancel: 'Cancel',
     save: 'Save',
     create: 'Create project',

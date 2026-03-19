@@ -20,7 +20,7 @@ import {
 } from '../../../core/models/project.model';
 
 @Component({
-  selector: 'app-project-list',
+  selector: 'app-project-form',
   standalone: true,
   imports: [
     CommonModule, FormsModule,
@@ -32,7 +32,7 @@ import {
   templateUrl: '../project-list/project-list.component.html',
   styleUrls: ['../project-list/project-list.component.scss'],
 })
-export class ProjectListComponent implements OnInit {
+export class ProjectFormComponent implements OnInit {
   projects: ProjectSummary[] = [];
   filtered: ProjectSummary[] = [];
 
@@ -61,7 +61,7 @@ export class ProjectListComponent implements OnInit {
         this.projects = data;
         this.applyFilter();
       },
-      error: () => { this.error = this.i18n.translate('projectList.errorLoad'); },
+      error: () => { this.error = this.i18n.translate('projectForm.errorLoad'); },
     });
   }
 

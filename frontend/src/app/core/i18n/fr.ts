@@ -162,6 +162,7 @@ export const fr: TranslationKeys = {
     fieldProjectManager: 'Chef de projet',
     errorNameRequired: 'Le nom est requis',
     errorPmRequired: 'Le chef de projet est requis',
+    errorLoad: 'Impossible de charger les projets.',
     cancel: 'Annuler',
     save: 'Enregistrer',
     create: 'Créer le projet',
