@@ -4,6 +4,7 @@
 @use './styles/buttons';
 @use './styles/tables';
 @use './styles/material';
+@use './styles/cards';
 
 // ─── Angular Material setup ───────────────────────────────────────────────────
 @include mat.core();

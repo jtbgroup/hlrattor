@@ -1,0 +1,28 @@
+@use "variables" as *;
+
+// ── Section card ──────────────────────────────────────────────────────────────
+
+.section-card {
+  background: $color-bg-white;
+  border-radius: $border-radius-lg;
+  border: 1px solid rgba(57, 73, 171, 0.12);
+  box-shadow: $shadow-card-md;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-text-muted;
+  flex: 1;
+}

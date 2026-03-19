@@ -1,69 +1,72 @@
-<h2 mat-dialog-title>Create Project</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="form" class="project-form">
-
-    <mat-form-field appearance="outline">
-      <mat-label>Name *</mat-label>
-      <input matInput formControlName="name" />
-      <mat-error *ngIf="form.get('name')?.hasError('required')">Name is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Reference *</mat-label>
-      <input matInput formControlName="reference" />
-      <mat-error *ngIf="form.get('reference')?.hasError('required')">Reference is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Sciforma Code *</mat-label>
-      <input matInput formControlName="sciformaCode" />
-      <mat-error *ngIf="form.get('sciformaCode')?.hasError('required')">Sciforma code is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>PORD BIA</mat-label>
-      <input matInput formControlName="pordBia" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>PORD Project</mat-label>
-      <input matInput formControlName="pordProject" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Project Manager *</mat-label>
-      <mat-select formControlName="projectManagerId">
-        <mat-option *ngFor="let pm of projectManagers" [value]="pm.id">
-          {{ pm.username }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('projectManagerId')?.hasError('required')">Project manager is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Initial Status *</mat-label>
-      <mat-select formControlName="initialStatus">
-        <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('initialStatus')?.hasError('required')">Status is required</mat-error>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Status Date *</mat-label>
-      <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate" />
-      <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
-      <mat-datepicker #statusDatePicker></mat-datepicker>
-      <mat-error *ngIf="form.get('statusDate')?.hasError('required')">Status date is required</mat-error>
-    </mat-form-field>
-
-    <mat-error *ngIf="error">{{ error }}</mat-error>
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancel</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="saving">
-    Create
+<div class="page-header">
+  <button mat-icon-button class="btn-back" (click)="cancel()">
+    <mat-icon>arrow_back</mat-icon>
   </button>
-</mat-dialog-actions>
+  <h2 class="page-title">
+    {{ isEdit ? 'Edit Project' : 'New Project' }}
+  </h2>
+</div>
+
+@if (loading) {
+  <div class="loading">Loading…</div>
+}
+
+@if (!loading && form) {
+  <div class="form-card">
+
+    @if (!isEdit) {
+      <div class="draft-notice">
+        <mat-icon>info_outline</mat-icon>
+        Every new project starts with status <strong>DRAFT</strong>, dated today.
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="project-form">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required />
+        <mat-error>Name is required</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sciforma Code</mat-label>
+        <input matInput formControlName="sciformaCode" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>PORD BIA</mat-label>
+        <input matInput formControlName="pordBia" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>PORD Project</mat-label>
+        <input matInput formControlName="pordProject" />
+      </mat-form-field>
+
+      @if (!isEdit) {
+        <mat-form-field appearance="outline">
+          <mat-label>Project Manager</mat-label>
+          <mat-select formControlName="projectManagerId" required>
+            @for (pm of projectManagers; track pm.id) {
+              <mat-option [value]="pm.id">{{ pm.username }}</mat-option>
+            }
+          </mat-select>
+          <mat-error>Project manager is required</mat-error>
+        </mat-form-field>
+      }
+
+      @if (error) {
+        <div class="form-error">{{ error }}</div>
+      }
+
+      <div class="form-actions">
+        <button mat-stroked-button type="button" (click)="cancel()">Cancel</button>
+        <button mat-flat-button class="btn-save" type="submit" [disabled]="form.invalid || saving">
+          {{ saving ? 'Saving…' : (isEdit ? 'Save' : 'Create project') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+}

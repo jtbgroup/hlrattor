@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Refonte portail RH",
+    "reference": "PRJ-2024-001",
+    "sciformaCode": "SC-RH-2024",
+    "pordBia": "PORD-BIA-001",
+    "pordProject": "PORD-PRJ-001",
+    "projectManagerUsername": "bob.dupont",
+    "initialStatus": "PROJECT",
+    "statusDate": "2024-03-01"
+  },
+  {
+    "name": "Migration infrastructure cloud",
+    "reference": "PRJ-2024-002",
+    "sciformaCode": "SC-INFRA-2024",
+    "pordBia": "PORD-BIA-002",
+    "pordProject": null,
+    "projectManagerUsername": "claire.leroy",
+    "initialStatus": "BIA",
+    "statusDate": "2024-05-15"
+  },
+  {
+    "name": "Déploiement CRM Salesforce",
+    "reference": "PRJ-2024-003",
+    "sciformaCode": "SC-CRM-2024",
+    "pordBia": null,
+    "pordProject": "PORD-PRJ-003",
+    "projectManagerUsername": "bob.dupont",
+    "initialStatus": "DRAFT",
+    "statusDate": "2024-09-01"
+  },
+  {
+    "name": "Audit sécurité SI",
+    "reference": "PRJ-2023-010",
+    "sciformaCode": "SC-SEC-2023",
+    "pordBia": "PORD-BIA-010",
+    "pordProject": "PORD-PRJ-010",
+    "projectManagerUsername": "claire.leroy",
+    "initialStatus": "CLOSED",
+    "statusDate": "2023-12-31"
+  },
+  {
+    "name": "Plateforme e-learning interne",
+    "reference": "PRJ-2024-004",
+    "sciformaCode": "SC-ELEARN-2024",
+    "pordBia": null,
+    "pordProject": null,
+    "projectManagerUsername": "emma.dubois",
+    "initialStatus": "PROJECT",
+    "statusDate": "2024-06-01"
+  },
+  {
+    "name": "Modernisation ERP financier",
+    "reference": "PRJ-2024-005",
+    "sciformaCode": "SC-ERP-2024",
+    "pordBia": "PORD-BIA-005",
+    "pordProject": "PORD-PRJ-005",
+    "projectManagerUsername": "bob.dupont",
+    "initialStatus": "CANCELED",
+    "statusDate": "2024-07-20"
+  }
+]

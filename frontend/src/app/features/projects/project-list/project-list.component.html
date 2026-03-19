@@ -1,9 +1,16 @@
 <div class="page-header">
-  <h1>Projects</h1>
-  <button *ngIf="isAdmin" mat-raised-button color="primary" (click)="openCreate()">
-    <mat-icon>add</mat-icon> Create project
-  </button>
+  <h2 class="page-title">Projects</h2>
+  @if (isAdmin) {
+    <button mat-flat-button class="btn-create" (click)="goToCreate()">
+      <mat-icon>add</mat-icon>
+      New project
+    </button>
+  }
 </div>
+
+@if (error) {
+  <div class="list-error">{{ error }}</div>
+}
 
 <!-- Filters -->
 <div class="filters">
@@ -11,7 +18,9 @@
     <mat-label>Status</mat-label>
     <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
       <mat-option value="">All</mat-option>
-      <mat-option *ngFor="let s of statuses" [value]="s">{{ s }}</mat-option>
+      @for (s of statuses; track s) {
+        <mat-option [value]="s">{{ s }}</mat-option>
+      }
     </mat-select>
   </mat-form-field>
 
@@ -22,54 +31,63 @@
 </div>
 
 <!-- Table -->
-<mat-table [dataSource]="filtered" matSort (matSortChange)="sortData($event)" class="project-table">
+<div class="table-card">
+  @if (filtered.length) {
+    <table mat-table [dataSource]="filtered" class="project-table">
 
-  <ng-container matColumnDef="reference">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>Reference</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.reference }}</mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="reference">
+        <th mat-header-cell *matHeaderCellDef>Reference</th>
+        <td mat-cell *matCellDef="let row">{{ row.reference }}</td>
+      </ng-container>
 
-  <ng-container matColumnDef="name">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+      </ng-container>
 
-  <ng-container matColumnDef="currentStatus">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
-    <mat-cell *matCellDef="let row">
-      <mat-chip [color]="statusColor(row.currentStatus)" highlighted>
-        {{ row.currentStatus }}
-      </mat-chip>
-    </mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="currentStatus">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="status-badge status-{{ row.currentStatus | lowercase }}">
+            {{ row.currentStatus }}
+          </span>
+        </td>
+      </ng-container>
 
-  <ng-container matColumnDef="currentProjectManager">
-    <mat-header-cell *matHeaderCellDef>Project Manager</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="currentProjectManager">
+        <th mat-header-cell *matHeaderCellDef>Project Manager</th>
+        <td mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</td>
+      </ng-container>
 
-  <ng-container matColumnDef="currentDueDate">
-    <mat-header-cell *matHeaderCellDef>Due Date</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="currentDueDate">
+        <th mat-header-cell *matHeaderCellDef>Due Date</th>
+        <td mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</td>
+      </ng-container>
 
-  <ng-container matColumnDef="totalBudget">
-    <mat-header-cell *matHeaderCellDef mat-sort-header>Total Budget</mat-header-cell>
-    <mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="totalBudget">
+        <th mat-header-cell *matHeaderCellDef>Total Budget</th>
+        <td mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</td>
+      </ng-container>
 
-  <ng-container matColumnDef="actions">
-    <mat-header-cell *matHeaderCellDef></mat-header-cell>
-    <mat-cell *matCellDef="let row">
-      <button mat-icon-button (click)="goToDetail(row)" matTooltip="View detail">
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
-    </mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          <button mat-icon-button (click)="goToDetail(row)" matTooltip="View detail">
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </td>
+      </ng-container>
 
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;"
-           class="clickable-row"
-           (click)="goToDetail(row)">
-  </mat-row>
-</mat-table>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          class="clickable-row"
+          (click)="goToDetail(row)">
+      </tr>
+    </table>
+  } @else {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">folder_open</mat-icon>
+      <p>No projects found.</p>
+    </div>
+  }
+</div>
