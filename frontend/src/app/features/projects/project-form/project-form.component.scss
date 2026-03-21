@@ -1,73 +1,27 @@
-@use 'styles/variables' as *;
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
 
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 24px;
-}
+  .full {
+    grid-column: 1 / -1;
+  }
 
-.btn-back { color: $color-brand-deep; }
-
-.page-title {
-  margin: 0;
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-bold;
-  color: $color-brand-deep;
-}
-
-.loading {
-  padding: 48px;
-  text-align: center;
-  color: $color-text-muted;
-}
-
-.form-card {
-  background: $color-bg-white;
-  border-radius: $border-radius-lg;
-  border: 1px solid rgba(57, 73, 171, 0.15);
-  box-shadow: $shadow-card-md;
-  padding: 28px 32px;
-  max-width: 560px;
-}
-
-.draft-notice {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #e3f2fd;
-  color: #1565c0;
-  border-left: 4px solid #1565c0;
-  border-radius: $border-radius-sm;
-  padding: 10px 14px;
-  margin-bottom: 20px;
-  font-size: $font-size-sm;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
+  mat-form-field {
+    width: 100%;
   }
 }
 
-.project-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-
-  mat-form-field { width: 100%; }
+.error-banner {
+  color: var(--mdc-theme-error, #f44336);
+  background: rgba(244, 67, 54, 0.08);
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
 }
 
-.form-error {
-  color: $color-danger-text;
-  font-size: $font-size-sm;
-  margin-top: 4px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
+mat-dialog-content {
+  min-width: 560px;
+  padding-top: 8px !important;
 }

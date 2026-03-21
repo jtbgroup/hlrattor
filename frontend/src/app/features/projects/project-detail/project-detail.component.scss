@@ -1,210 +1,108 @@
-@use 'styles/variables' as *;
-
-.loading {
-  padding: 48px;
-  text-align: center;
-  color: $color-text-muted;
+.detail-container {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-// ── Page header ───────────────────────────────────────────────────────────────
-
-.page-header {
+.detail-header {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
 }
 
-.btn-back { color: $color-brand-deep; }
-
-.page-title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.section-card {
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+  }
 }
-
-.page-title {
-  margin: 0;
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-bold;
-  color: $color-brand-deep;
-  line-height: 1.2;
-}
-
-.page-ref {
-  font-size: $font-size-sm;
-  color: $color-text-muted;
-}
-
-.spacer { flex: 1; }
-
-// ── Read-only banner ──────────────────────────────────────────────────────────
-
-.readonly-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff3e0;
-  color: #e65100;
-  border-left: 4px solid #e65100;
-  padding: 10px 16px;
-  border-radius: $border-radius-sm;
-  margin-bottom: 16px;
-  font-size: $font-size-sm;
-
-  mat-icon { font-size: 18px; width: 18px; height: 18px; }
-}
-
-// ── Info grid (panneau 1) ─────────────────────────────────────────────────────
 
 .info-grid {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 180px 1fr;
+  gap: 8px 16px;
+  margin: 0;
+
+  dt {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  dd {
+    margin: 0;
+  }
 }
 
-.info-col {
+.inline-form {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  align-items: flex-start;
+  margin-top: 12px;
 
-  &:last-child { padding-left: 32px; }
+  mat-form-field {
+    min-width: 220px;
+  }
 }
 
-.col-heading {
-  margin: 0 0 4px;
-  font-size: 11px;
-  font-weight: $font-weight-bold;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: $color-text-muted;
-}
-
-.col-divider {
-  width: 1px;
-  background: rgba(57, 73, 171, 0.12);
-  margin: 0 24px;
-  align-self: stretch;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.label {
-  font-size: 11px;
-  font-weight: $font-weight-bold;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: $color-text-muted;
-}
-
-.value {
-  font-size: $font-size-sm;
-  color: $color-text;
-}
-
-.budget-total {
-  font-size: $font-size-base;
-  font-weight: $font-weight-bold;
-  color: $color-brand-deep;
-}
-
-// ── State row (avec bouton edit inline) ───────────────────────────────────────
-
-.state-row {
+.form-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-
-  .field { flex: 1; }
-}
-
-// ── Status badges ─────────────────────────────────────────────────────────────
-
-.status-badge {
-  display: inline-block;
-  align-self: flex-start;
-  font-size: 11px;
-  font-weight: $font-weight-bold;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: $border-radius-pill;
-  padding: 3px 10px;
-  white-space: nowrap;
-
-  &.status-draft    { background: #e3f2fd; color: #1565c0; }
-  &.status-bia      { background: #fff8e1; color: #f57f17; }
-  &.status-project  { background: $color-success-bg; color: $color-success-text; }
-  &.status-canceled { background: $color-warning-bg; color: $color-warning-text; }
-  &.status-closed   { background: #f5f5f5; color: #616161; }
-}
-
-// ── Data table ────────────────────────────────────────────────────────────────
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: $font-size-sm;
-
-  th {
-    text-align: left;
-    padding: 6px 10px;
-    font-size: 11px;
-    font-weight: $font-weight-bold;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: $color-text-muted;
-    border-bottom: 1px solid $color-border-light;
-  }
-
-  td {
-    padding: 7px 10px;
-    border-bottom: 1px solid $color-border-light;
-    color: $color-text;
-  }
-
-  tr:last-child td { border-bottom: none; }
-}
-
-.table-empty {
-  color: $color-text-muted;
-  font-style: italic;
-  text-align: center;
-  padding: 16px 10px;
-}
-
-.actions-cell {
-  white-space: nowrap;
-  text-align: right;
-}
-
-// ── History panels (panneau 3) ────────────────────────────────────────────────
-
-.history-panels {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.history-block {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
+  padding-top: 4px;
 }
 
-.history-block-title {
+.current-value {
   margin: 0 0 8px;
-  font-size: 12px;
-  font-weight: $font-weight-bold;
+  font-size: 0.95rem;
+}
+
+.divider {
+  margin: 16px 0;
+}
+
+h4 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 0 0 8px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: $color-brand-deep;
-  padding-bottom: 8px;
-  border-bottom: 2px solid $color-brand-bg;
+  letter-spacing: 0.04em;
+}
+
+.history-table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.no-data {
+  text-align: center;
+  padding: 16px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 64px;
+}
+
+.error-banner {
+  color: var(--mdc-theme-error, #f44336);
+  background: rgba(244, 67, 54, 0.08);
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
 }

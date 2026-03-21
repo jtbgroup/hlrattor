@@ -1,94 +1,94 @@
-<div class="page-header">
-  <h2 class="page-title">{{ 'projectList.title' | translate }}</h2>
-  @if (isAdmin) {
-    <button mat-flat-button class="btn-create" (click)="goToCreate()">
-      <mat-icon>add</mat-icon>
-      {{ 'projectList.newProject' | translate }}
-    </button>
-  }
-</div>
+<div class="project-list-container">
 
-@if (error) {
-  <div class="list-error">{{ error }}</div>
-}
+  <div class="list-header">
+    <h1>Projets</h1>
+    @if (isAdmin) {
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Créer un projet
+      </button>
+    }
+  </div>
 
-<!-- Filters -->
-<div class="filters">
-  <mat-form-field appearance="outline">
-    <mat-label>{{ 'projectList.filterStatus' | translate }}</mat-label>
-    <mat-select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
-      <mat-option value="">{{ 'projectList.filterStatusAll' | translate }}</mat-option>
-      @for (s of statuses; track s) {
-        <mat-option [value]="s">{{ s }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
+  <!-- Filters -->
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Statut</mat-label>
+      <mat-select [(ngModel)]="filterStatus" (ngModelChange)="filterStatus.set($event)">
+        <mat-option value="">Tous</mat-option>
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>{{ 'projectList.filterPm' | translate }}</mat-label>
-    <input matInput [(ngModel)]="filterPm" (ngModelChange)="applyFilter()"
-           [placeholder]="'projectList.filterPmPlaceholder' | translate" />
-  </mat-form-field>
-</div>
+    <mat-form-field appearance="outline">
+      <mat-label>Chef de projet</mat-label>
+      <input matInput [(ngModel)]="filterPm" (ngModelChange)="filterPm.set($event)"
+             placeholder="Filtrer par chef de projet" />
+    </mat-form-field>
+  </div>
 
-<!-- Table -->
-<div class="table-card">
-  @if (filtered.length) {
-    <table mat-table [dataSource]="filtered" class="project-table">
+  @if (loading()) {
+    <div class="spinner-wrapper">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else {
+    <table mat-table [dataSource]="filteredProjects()" matSort class="mat-elevation-z2 full-width">
 
       <ng-container matColumnDef="reference">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colReference' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.reference }}</td>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Référence</th>
+        <td mat-cell *matCellDef="let p">{{ p.reference }}</td>
       </ng-container>
 
       <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colName' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom</th>
+        <td mat-cell *matCellDef="let p">{{ p.name }}</td>
       </ng-container>
 
       <ng-container matColumnDef="currentStatus">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colStatus' | translate }}</th>
-        <td mat-cell *matCellDef="let row">
-          <span class="status-badge status-{{ row.currentStatus | lowercase }}">
-            {{ row.currentStatus }}
-          </span>
+        <th mat-header-cell *matHeaderCellDef>Statut</th>
+        <td mat-cell *matCellDef="let p">
+          <mat-chip [color]="statusColor(p.currentStatus)" highlighted>
+        [color]="statusColor(p.currentStatus)"
+{{ getStatusLabel(p.currentStatus) }}
+          </mat-chip>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="currentProjectManager">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colProjectManager' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.currentProjectManager ?? '—' }}</td>
+        <th mat-header-cell *matHeaderCellDef>Chef de projet</th>
+        <td mat-cell *matCellDef="let p">{{ p.currentProjectManager ?? '—' }}</td>
       </ng-container>
 
       <ng-container matColumnDef="currentDueDate">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colDueDate' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.currentDueDate ?? '—' }}</td>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Échéance</th>
+        <td mat-cell *matCellDef="let p">{{ p.currentDueDate ?? '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentProgression">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Progression</th>
+        <td mat-cell *matCellDef="let p">
+          {{ p.currentProgression !== null ? p.currentProgression + ' %' : '—' }}
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="totalBudget">
-        <th mat-header-cell *matHeaderCellDef>{{ 'projectList.colTotalBudget' | translate }}</th>
-        <td mat-cell *matCellDef="let row">{{ row.totalBudget | number:'1.2-2' }} €</td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let row">
-          <button mat-icon-button (click)="goToDetail(row)" [matTooltip]="'projectList.viewDetail' | translate">
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Budget total</th>
+        <td mat-cell *matCellDef="let p">
+          {{ p.totalBudget | currency:'EUR':'symbol':'1.2-2':'fr' }}
         </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-          class="clickable-row"
-          (click)="goToDetail(row)">
+          class="clickable-row" (click)="goToDetail(row)"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
+          Aucun projet trouvé.
+        </td>
       </tr>
     </table>
-  } @else {
-    <div class="empty-state">
-      <mat-icon class="empty-icon">folder_open</mat-icon>
-      <p>{{ 'projectList.noProjects' | translate }}</p>
-    </div>
   }
 </div>

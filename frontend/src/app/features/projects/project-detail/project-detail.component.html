@@ -1,285 +1,354 @@
-@if (loading) {
-  <div class="loading">{{ 'projectDetail.loading' | translate }}</div>
-}
+<div class="detail-container">
 
-@if (!loading && project) {
-
-  <!-- ── Header ─────────────────────────────────────────────────── -->
-  <div class="page-header">
-    <button mat-icon-button class="btn-back" (click)="goBack()">
-      <mat-icon>arrow_back</mat-icon>
-    </button>
-    <div class="page-title-block">
-      <h2 class="page-title">{{ project.name }}</h2>
-      <span class="page-ref">{{ project.reference }}</span>
-    </div>
-    <span class="spacer"></span>
-    @if (canEdit && !isReadOnly) {
-      <button mat-stroked-button (click)="goToEdit()">
-        <mat-icon>edit</mat-icon>
-        {{ 'projectDetail.edit' | translate }}
-      </button>
-    }
-  </div>
-
-  @if (isReadOnly) {
-    <div class="readonly-banner">
-      <mat-icon>lock</mat-icon>
-      {{ 'projectDetail.readonlyBanner' | translate }}
-    </div>
+  @if (loading()) {
+    <div class="spinner-wrapper"><mat-spinner diameter="48" /></div>
   }
 
-  <!-- ══════════════════════════════════════════════════════════════
-       PANNEAU 1 — Informations générales + état courant
-  ══════════════════════════════════════════════════════════════ -->
-  <div class="section-card">
-    <div class="info-grid">
+  @if (!loading() && project(); as p) {
 
-      <!-- Colonne gauche -->
-      <div class="info-col">
-        <p class="section-title">{{ 'projectDetail.panelGeneral' | translate }}</p>
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldReference' | translate }}</span>
-          <span class="value">{{ project.reference }}</span>
-        </div>
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldName' | translate }}</span>
-          <span class="value">{{ project.name }}</span>
-        </div>
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldSciformaCode' | translate }}</span>
-          <span class="value">{{ project.sciformaCode || '—' }}</span>
-        </div>
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldPordBia' | translate }}</span>
-          <span class="value">{{ project.pordBia ?? '—' }}</span>
-        </div>
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldPordProject' | translate }}</span>
-          <span class="value">{{ project.pordProject ?? '—' }}</span>
-        </div>
-      </div>
-
-      <div class="col-divider"></div>
-
-      <!-- Colonne droite : état courant -->
-      <div class="info-col">
-        <p class="section-title">{{ 'projectDetail.panelCurrentState' | translate }}</p>
-
-        <div class="state-row">
-          <div class="field">
-            <span class="label">{{ 'projectDetail.fieldStatus' | translate }}</span>
-            <span class="status-badge status-{{ project.currentStatus | lowercase }}">
-              {{ project.currentStatus }}
-            </span>
-          </div>
-          @if (canEdit) {
-            <button mat-icon-button [matTooltip]="'projectDetail.tooltipChangeStatus' | translate" (click)="openStatusDialog()">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
-        </div>
-
-        <div class="state-row">
-          <div class="field">
-            <span class="label">{{ 'projectDetail.fieldProjectManager' | translate }}</span>
-            <span class="value">{{ project.currentProjectManager ?? '—' }}</span>
-          </div>
-          @if (isAdmin && !isReadOnly) {
-            <button mat-icon-button [matTooltip]="'projectDetail.tooltipChangePm' | translate" (click)="openPmDialog()">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
-        </div>
-
-        <div class="state-row">
-          <div class="field">
-            <span class="label">{{ 'projectDetail.fieldDueDate' | translate }}</span>
-            <span class="value">{{ project.currentDueDate ?? '—' }}</span>
-          </div>
-          @if (canEdit && !isReadOnly) {
-            <button mat-icon-button [matTooltip]="'projectDetail.tooltipSetDueDate' | translate" (click)="openDueDateDialog()">
-              <mat-icon>edit</mat-icon>
-            </button>
-          }
-        </div>
-
-        <div class="field">
-          <span class="label">{{ 'projectDetail.fieldTotalBudget' | translate }}</span>
-          <span class="value budget-total">{{ project.totalBudget | number:'1.2-2' }} €</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       PANNEAU 2 — Budget lines
-  ══════════════════════════════════════════════════════════════ -->
-  <div class="section-card">
-    <div class="section-header">
-      <span class="section-title">{{ 'projectDetail.panelBudget' | translate }}</span>
-      @if (canEdit && !isReadOnly) {
-        <button mat-icon-button [matTooltip]="'projectDetail.addBudgetLine' | translate" (click)="openAddBudgetLine()">
-          <mat-icon>add</mat-icon>
-        </button>
-      }
+    <!-- Nav -->
+    <div class="detail-header">
+      <button mat-icon-button (click)="back()" matTooltip="Retour à la liste">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>{{ p.reference }} — {{ p.name }}</h1>
+      <mat-chip [color]="statusColor(p.currentStatus)" highlighted>
+        {{ statusLabels[p.currentStatus] }}
+      </mat-chip>
     </div>
 
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>{{ 'projectDetail.budgetColType' | translate }}</th>
-          <th>{{ 'projectDetail.budgetColAmount' | translate }}</th>
-          <th>{{ 'projectDetail.budgetColComment' | translate }}</th>
-          @if (canEdit && !isReadOnly) { <th></th> }
-        </tr>
-      </thead>
-      <tbody>
-        @for (line of project.budgetLines; track line.id) {
-          <tr>
-            <td>{{ line.type }}</td>
-            <td>{{ line.amount | number:'1.2-2' }}</td>
-            <td>{{ line.pordReference ?? '—' }}</td>
-            @if (canEdit && !isReadOnly) {
-              <td class="actions-cell">
-                <button mat-icon-button (click)="openEditBudgetLine(line)" [matTooltip]="'projectDetail.tooltipEdit' | translate">
+    @if (errorMessage()) {
+      <p class="error-banner">{{ errorMessage() }}</p>
+    }
+
+    <!-- ══ En-tête ══════════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Informations générales</mat-card-title>
+        @if (canEdit && !isReadOnly && !showHeaderEdit) {
+          <button mat-icon-button (click)="showHeaderEdit = true" matTooltip="Modifier">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (!showHeaderEdit) {
+          <dl class="info-grid">
+            <dt>Référence</dt><dd>{{ p.reference }}</dd>
+            <dt>Nom</dt><dd>{{ p.name }}</dd>
+            <dt>Code Sciforma</dt><dd>{{ p.sciformaCode }}</dd>
+            <dt>PORD BIA</dt><dd>{{ p.pordBia ?? '—' }}</dd>
+            <dt>PORD Projet</dt><dd>{{ p.pordProject ?? '—' }}</dd>
+            <dt>Créé par</dt><dd>{{ p.createdBy }}</dd>
+          </dl>
+        } @else {
+          <form [formGroup]="headerForm" class="inline-form">
+            @if (isAdmin) {
+              <mat-form-field appearance="outline">
+                <mat-label>Nom *</mat-label>
+                <input matInput formControlName="name" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Référence *</mat-label>
+                <input matInput formControlName="reference" />
+              </mat-form-field>
+            }
+            <mat-form-field appearance="outline">
+              <mat-label>Code Sciforma *</mat-label>
+              <input matInput formControlName="sciformaCode" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>PORD BIA</mat-label>
+              <input matInput formControlName="pordBia" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>PORD Projet</mat-label>
+              <input matInput formControlName="pordProject" />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="showHeaderEdit = false">Annuler</button>
+              <button mat-raised-button color="primary" (click)="saveHeader()"
+                      [disabled]="headerForm.invalid || saving()">
+                @if (saving()) { <mat-spinner diameter="18" /> } @else { Enregistrer }
+              </button>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ══ Statut ════════════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Statut</mat-card-title>
+        @if (canEdit && !showStatusForm) {
+          <button mat-icon-button (click)="showStatusForm = true" matTooltip="Modifier le statut">
+            <mat-icon>swap_horiz</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        <p class="current-value">
+          Statut actuel :
+          <mat-chip [color]="statusColor(p.currentStatus)" highlighted>
+            {{ statusLabels[p.currentStatus] }}
+          </mat-chip>
+        </p>
+
+        @if (showStatusForm) {
+          <form [formGroup]="statusForm" class="inline-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Nouveau statut *</mat-label>
+              <mat-select formControlName="status">
+                @for (s of statuses; track s) {
+                  <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Date métier *</mat-label>
+              <input matInput [matDatepicker]="sp" formControlName="businessDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="sp" /><mat-datepicker #sp />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="showStatusForm = false">Annuler</button>
+              <button mat-raised-button color="primary" (click)="saveStatus()"
+                      [disabled]="statusForm.invalid || saving()">Enregistrer</button>
+            </div>
+          </form>
+        }
+
+        <mat-divider class="divider" />
+        <h4>Historique des statuts</h4>
+        <table mat-table [dataSource]="p.statusHistory" class="history-table">
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Statut</th>
+            <td mat-cell *matCellDef="let r">{{ getStatusLabel(p.currentStatus) }}
+{{ getStatusLabel(r.status) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="businessDate">
+            <th mat-header-cell *matHeaderCellDef>Date métier</th>
+            <td mat-cell *matCellDef="let r">{{ r.businessDate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="changedBy">
+            <th mat-header-cell *matHeaderCellDef>Modifié par</th>
+            <td mat-cell *matCellDef="let r">{{ r.changedBy }}</td>
+          </ng-container>
+          <ng-container matColumnDef="changedAt">
+            <th mat-header-cell *matHeaderCellDef>Le</th>
+            <td mat-cell *matCellDef="let r">{{ r.changedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="statusColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: statusColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ══ Chef de projet ════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Chef de projet</mat-card-title>
+        @if (isAdmin && !showPmForm) {
+          <button mat-icon-button (click)="showPmForm = true" matTooltip="Modifier le chef de projet">
+            <mat-icon>manage_accounts</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        <p class="current-value">Actuel : <strong>{{ p.currentProjectManager ?? '—' }}</strong></p>
+
+        @if (showPmForm) {
+          <form [formGroup]="pmForm" class="inline-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Chef de projet *</mat-label>
+              <mat-select formControlName="projectManagerId">
+                @for (pm of projectManagers(); track pm.id) {
+                  <mat-option [value]="pm.id">{{ pm.username }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="showPmForm = false">Annuler</button>
+              <button mat-raised-button color="primary" (click)="savePm()"
+                      [disabled]="pmForm.invalid || saving()">Enregistrer</button>
+            </div>
+          </form>
+        }
+
+        <mat-divider class="divider" />
+        <h4>Historique des chefs de projet</h4>
+        <table mat-table [dataSource]="p.projectManagerHistory" class="history-table">
+          <ng-container matColumnDef="projectManager">
+            <th mat-header-cell *matHeaderCellDef>Chef de projet</th>
+            <td mat-cell *matCellDef="let r">{{ r.projectManager }}</td>
+          </ng-container>
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef>Début</th>
+            <td mat-cell *matCellDef="let r">{{ r.startDate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef>Fin</th>
+            <td mat-cell *matCellDef="let r">{{ r.endDate ?? 'En cours' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="assignedBy">
+            <th mat-header-cell *matHeaderCellDef>Assigné par</th>
+            <td mat-cell *matCellDef="let r">{{ r.assignedBy }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="pmColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: pmColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ══ Échéance ══════════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Échéance</mat-card-title>
+        @if (canEdit && !isReadOnly && !showDueDateForm) {
+          <button mat-icon-button (click)="showDueDateForm = true" matTooltip="Modifier l'échéance">
+            <mat-icon>event</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        <p class="current-value">Actuelle : <strong>{{ p.currentDueDate ?? '—' }}</strong></p>
+
+        @if (showDueDateForm) {
+          <form [formGroup]="dueDateForm" class="inline-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Nouvelle échéance *</mat-label>
+              <input matInput [matDatepicker]="ddp" formControlName="dueDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="ddp" /><mat-datepicker #ddp />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-button (click)="showDueDateForm = false">Annuler</button>
+              <button mat-raised-button color="primary" (click)="saveDueDate()"
+                      [disabled]="dueDateForm.invalid || saving()">Enregistrer</button>
+            </div>
+          </form>
+        }
+
+        <mat-divider class="divider" />
+        <h4>Historique des échéances</h4>
+        <table mat-table [dataSource]="p.dueDateHistory" class="history-table">
+          <ng-container matColumnDef="dueDate">
+            <th mat-header-cell *matHeaderCellDef>Échéance</th>
+            <td mat-cell *matCellDef="let r">{{ r.dueDate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="changedBy">
+            <th mat-header-cell *matHeaderCellDef>Modifié par</th>
+            <td mat-cell *matCellDef="let r">{{ r.changedBy }}</td>
+          </ng-container>
+          <ng-container matColumnDef="changedAt">
+            <th mat-header-cell *matHeaderCellDef>Le</th>
+            <td mat-cell *matCellDef="let r">{{ r.changedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="dueDateColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: dueDateColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ══ Progression ═══════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Progression</mat-card-title>
+        @if (canEdit && !isReadOnly) {
+          <button mat-icon-button (click)="openProgressionDialog()" matTooltip="Ajouter une progression">
+            <mat-icon>add_chart</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        <p class="current-value">
+          Progression actuelle :
+          <strong>{{ p.currentProgression !== null ? p.currentProgression + ' %' : '—' }}</strong>
+        </p>
+
+        <mat-divider class="divider" />
+        <h4>Historique de progression</h4>
+        <table mat-table [dataSource]="p.progressionHistory" class="history-table">
+          <ng-container matColumnDef="value">
+            <th mat-header-cell *matHeaderCellDef>Valeur</th>
+            <td mat-cell *matCellDef="let r">{{ r.value }} %</td>
+          </ng-container>
+          <ng-container matColumnDef="progressionDate">
+            <th mat-header-cell *matHeaderCellDef>Date de progression</th>
+            <td mat-cell *matCellDef="let r">{{ r.progressionDate }}</td>
+          </ng-container>
+          <ng-container matColumnDef="recordedBy">
+            <th mat-header-cell *matHeaderCellDef>Enregistré par</th>
+            <td mat-cell *matCellDef="let r">{{ r.recordedBy }}</td>
+          </ng-container>
+          <ng-container matColumnDef="recordedAt">
+            <th mat-header-cell *matHeaderCellDef>Enregistré le</th>
+            <td mat-cell *matCellDef="let r">{{ r.recordedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="progressionColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: progressionColumns;"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" colspan="4">Aucune progression enregistrée.</td>
+          </tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ══ Budget ════════════════════════════════════════════════════════════ -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>Budget</mat-card-title>
+        @if (canEdit && !isReadOnly) {
+          <button mat-icon-button (click)="openBudgetLineDialog()" matTooltip="Ajouter une ligne">
+            <mat-icon>add</mat-icon>
+          </button>
+        }
+      </mat-card-header>
+      <mat-card-content>
+        <p class="current-value">
+          Budget total :
+          <strong>{{ p.totalBudget | currency:'EUR':'symbol':'1.2-2':'fr' }}</strong>
+        </p>
+
+        <table mat-table [dataSource]="p.budgetLines" class="history-table">
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let r">{{ r.type }}</td>
+          </ng-container>
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Montant</th>
+            <td mat-cell *matCellDef="let r">{{ r.amount | currency:'EUR':'symbol':'1.2-2':'fr' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let r">{{ r.date }}</td>
+          </ng-container>
+          <ng-container matColumnDef="createdBy">
+            <th mat-header-cell *matHeaderCellDef>Créé par</th>
+            <td mat-cell *matCellDef="let r">{{ r.createdBy }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let r">
+              @if (canEdit && !isReadOnly) {
+                <button mat-icon-button (click)="openBudgetLineDialog(r)" matTooltip="Modifier">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" (click)="deleteBudgetLine(line)" [matTooltip]="'projectDetail.tooltipDelete' | translate">
+                <button mat-icon-button color="warn" (click)="deleteBudgetLine(r.id)"
+                        matTooltip="Supprimer">
                   <mat-icon>delete</mat-icon>
                 </button>
-              </td>
-            }
-          </tr>
-        } @empty {
-          <tr>
-            <td [attr.colspan]="(canEdit && !isReadOnly) ? 4 : 3" class="table-empty">
-              {{ 'projectDetail.budgetEmpty' | translate }}
+              }
             </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="budgetColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: budgetColumns;"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" colspan="5">Aucune ligne budgétaire.</td>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ══════════════════════════════════════════════════════════════
-       PANNEAU 3 — Historiques
-  ══════════════════════════════════════════════════════════════ -->
-  <div class="section-card">
-    <div class="section-header">
-      <span class="section-title">{{ 'projectDetail.panelHistory' | translate }}</span>
-    </div>
-
-    <div class="history-panels">
-
-      <!-- Status history -->
-      <div class="history-block">
-        <p class="history-block-title">{{ 'projectDetail.historyStatus' | translate }}</p>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'projectDetail.historyColStatus' | translate }}</th>
-              <th>{{ 'projectDetail.historyColDate' | translate }}</th>
-              <th>{{ 'projectDetail.historyColBy' | translate }}</th>
-              @if (canEdit) { <th></th> }
-            </tr>
-          </thead>
-          <tbody>
-            @for (h of project.statusHistory; track h.id) {
-              <tr>
-                <td><span class="status-badge status-{{ h.status | lowercase }}">{{ h.status }}</span></td>
-                <td>{{ h.businessDate }}</td>
-                <td>{{ h.changedBy }}</td>
-                @if (canEdit) {
-                  <td class="actions-cell">
-                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openStatusDialog(h)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deleteStatusEntry(h)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                }
-              </tr>
-            } @empty {
-              <tr><td colspan="4" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
-            }
-          </tbody>
         </table>
-      </div>
+      </mat-card-content>
+    </mat-card>
 
-      <!-- PM history -->
-      <div class="history-block">
-        <p class="history-block-title">{{ 'projectDetail.historyPm' | translate }}</p>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'projectDetail.historyColName' | translate }}</th>
-              <th>{{ 'projectDetail.historyColFrom' | translate }}</th>
-              <th>{{ 'projectDetail.historyColTo' | translate }}</th>
-              @if (isAdmin) { <th></th> }
-            </tr>
-          </thead>
-          <tbody>
-            @for (h of project.managerHistory; track h.id) {
-              <tr>
-                <td>{{ h.projectManager }}</td>
-                <td>{{ h.startDate }}</td>
-                <td>{{ h.endDate ?? ('projectDetail.historyCurrent' | translate) }}</td>
-                @if (isAdmin) {
-                  <td class="actions-cell">
-                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openPmDialog(h)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deletePmEntry(h)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                }
-              </tr>
-            } @empty {
-              <tr><td colspan="4" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Due date history -->
-      <div class="history-block">
-        <p class="history-block-title">{{ 'projectDetail.historyDueDate' | translate }}</p>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>{{ 'projectDetail.historyColDueDate' | translate }}</th>
-              <th>{{ 'projectDetail.historyColBy' | translate }}</th>
-              @if (canEdit) { <th></th> }
-            </tr>
-          </thead>
-          <tbody>
-            @for (h of project.dueDateHistory; track h.id) {
-              <tr>
-                <td>{{ h.dueDate }}</td>
-                <td>{{ h.changedBy }}</td>
-                @if (canEdit) {
-                  <td class="actions-cell">
-                    <button mat-icon-button [matTooltip]="'projectDetail.tooltipEdit' | translate" (click)="openDueDateDialog(h)">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button color="warn" [matTooltip]="'projectDetail.tooltipDelete' | translate" (click)="deleteDueDateEntry(h)">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </td>
-                }
-              </tr>
-            } @empty {
-              <tr><td colspan="3" class="table-empty">{{ 'projectDetail.historyEmpty' | translate }}</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-    </div>
-  </div>
-
-}
+  }
+</div>

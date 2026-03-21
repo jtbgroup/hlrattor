@@ -2,16 +2,111 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import {
-  BudgetLinePayload,
-  CreateProjectPayload,
-  DueDateChangePayload,
-  ProjectDetail,
-  ProjectManagerChangePayload,
-  ProjectSummary,
-  StatusChangePayload,
-  UpdateProjectPayload,
-} from '../models/project.model';
+
+export type ProjectStatus = 'DRAFT' | 'BIA' | 'PROJECT' | 'CANCELED' | 'CLOSED';
+export type BudgetLineType = 'ENGAGEMENT_INITIAL' | 'COMMANDE_COMPLEMENTAIRE' | 'TRANSFERT';
+
+export interface ProjectSummary {
+  id: string;
+  reference: string;
+  name: string;
+  currentStatus: ProjectStatus;
+  currentProjectManager: string | null;
+  currentDueDate: string | null;
+  currentProgression: number | null;
+  totalBudget: number;
+}
+
+export interface ProjectStatusHistoryEntry {
+  id: string;
+  status: ProjectStatus;
+  businessDate: string;
+  changedBy: string;
+  changedAt: string;
+}
+
+export interface ProjectManagerHistoryEntry {
+  id: string;
+  projectManager: string;
+  startDate: string;
+  endDate: string | null;
+  assignedBy: string;
+  assignedAt: string;
+}
+
+export interface DueDateHistoryEntry {
+  id: string;
+  dueDate: string;
+  changedBy: string;
+  changedAt: string;
+}
+
+export interface BudgetLineResponse {
+  id: string;
+  type: BudgetLineType;
+  amount: number;
+  date: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string | null;
+  updatedAt: string | null;
+}
+
+export interface ProgressionResponse {
+  id: string;
+  value: number;
+  progressionDate: string;
+  recordedBy: string;
+  recordedAt: string;
+}
+
+export interface ProjectDetail extends ProjectSummary {
+  sciformaCode: string;
+  pordBia: string | null;
+  pordProject: string | null;
+  createdBy: string;
+  createdAt: string;
+  statusHistory: ProjectStatusHistoryEntry[];
+  projectManagerHistory: ProjectManagerHistoryEntry[];
+  dueDateHistory: DueDateHistoryEntry[];
+  budgetLines: BudgetLineResponse[];
+  progressionHistory: ProgressionResponse[];
+}
+
+export interface CreateProjectPayload {
+  name: string;
+  reference: string;
+  sciformaCode: string;
+  pordBia?: string;
+  pordProject?: string;
+  projectManagerId: string;
+  initialStatus: ProjectStatus;
+  statusDate: string;
+}
+
+export interface UpdateProjectPayload {
+  name?: string;
+  reference?: string;
+  sciformaCode?: string;
+  pordBia?: string;
+  pordProject?: string;
+}
+
+export interface StatusChangePayload {
+  status: ProjectStatus;
+  businessDate: string;
+}
+
+export interface BudgetLinePayload {
+  type: BudgetLineType;
+  amount: number;
+  date: string;
+}
+
+export interface ProgressionPayload {
+  progressionValue: number;
+  progressionDate: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
@@ -38,12 +133,12 @@ export class ProjectService {
     return this.http.post<ProjectDetail>(`${this.base}/${id}/status`, payload);
   }
 
-  changeProjectManager(id: string, payload: ProjectManagerChangePayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/project-manager`, payload);
+  changeProjectManager(id: string, projectManagerId: string): Observable<ProjectDetail> {
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/project-manager`, { projectManagerId });
   }
 
-  changeDueDate(id: string, payload: DueDateChangePayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/due-date`, payload);
+  changeDueDate(id: string, dueDate: string): Observable<ProjectDetail> {
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/due-date`, { dueDate });
   }
 
   addBudgetLine(id: string, payload: BudgetLinePayload): Observable<ProjectDetail> {
@@ -56,5 +151,9 @@ export class ProjectService {
 
   deleteBudgetLine(id: string, lineId: string): Observable<ProjectDetail> {
     return this.http.delete<ProjectDetail>(`${this.base}/${id}/budget-lines/${lineId}`);
+  }
+
+  addProgression(id: string, payload: ProgressionPayload): Observable<ProjectDetail> {
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/progressions`, payload);
   }
 }

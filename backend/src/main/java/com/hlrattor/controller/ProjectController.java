@@ -1,6 +1,6 @@
 package com.hlrattor.controller;
 
-import com.hlrattor.dto.*;
+import com.hlrattor.dto.ProjectDtos.*;
 import com.hlrattor.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,40 +21,46 @@ public class ProjectController {
         this.projectService = projectService;
     }
 
-    // GET /api/projects — any authenticated user
+    // ─── List / Detail ────────────────────────────────────────────────────────
+
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public List<ProjectSummaryDto> listProjects() {
         return projectService.listProjects();
     }
 
-    // GET /api/projects/{id} — any authenticated user
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto getProject(@PathVariable UUID id) {
         return projectService.getProject(id);
     }
 
-    // POST /api/projects — ADMIN only
+    // ─── Create / Update ──────────────────────────────────────────────────────
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProjectDetailDto> createProject(@Valid @RequestBody CreateProjectDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.createProject(dto));
     }
 
-    // PUT /api/projects/{id} — ADMIN or assigned PM (enforced in service)
     @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto updateProject(@PathVariable UUID id,
                                           @Valid @RequestBody UpdateProjectDto dto) {
         return projectService.updateProject(id, dto);
     }
 
-    // POST /api/projects/{id}/status — ADMIN or assigned PM (enforced in service)
+    // ─── Status ───────────────────────────────────────────────────────────────
+
     @PostMapping("/{id}/status")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto changeStatus(@PathVariable UUID id,
                                          @Valid @RequestBody StatusChangeDto dto) {
         return projectService.changeStatus(id, dto);
     }
 
-    // POST /api/projects/{id}/project-manager — ADMIN only
+    // ─── Project manager ──────────────────────────────────────────────────────
+
     @PostMapping("/{id}/project-manager")
     @PreAuthorize("hasRole('ADMIN')")
     public ProjectDetailDto changeProjectManager(@PathVariable UUID id,
@@ -62,32 +68,45 @@ public class ProjectController {
         return projectService.changeProjectManager(id, dto);
     }
 
-    // POST /api/projects/{id}/due-date — ADMIN or assigned PM (enforced in service)
+    // ─── Due date ─────────────────────────────────────────────────────────────
+
     @PostMapping("/{id}/due-date")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto changeDueDate(@PathVariable UUID id,
                                           @Valid @RequestBody DueDateChangeDto dto) {
         return projectService.changeDueDate(id, dto);
     }
 
-    // POST /api/projects/{id}/budget-lines — ADMIN or assigned PM (enforced in service)
+    // ─── Budget lines ─────────────────────────────────────────────────────────
+
     @PostMapping("/{id}/budget-lines")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDetailDto> addBudgetLine(@PathVariable UUID id,
                                                            @Valid @RequestBody BudgetLineDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(projectService.addBudgetLine(id, dto));
     }
 
-    // PUT /api/projects/{id}/budget-lines/{lineId}
     @PutMapping("/{id}/budget-lines/{lineId}")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto updateBudgetLine(@PathVariable UUID id,
                                               @PathVariable UUID lineId,
                                               @Valid @RequestBody BudgetLineDto dto) {
         return projectService.updateBudgetLine(id, lineId, dto);
     }
 
-    // DELETE /api/projects/{id}/budget-lines/{lineId}
     @DeleteMapping("/{id}/budget-lines/{lineId}")
+    @PreAuthorize("isAuthenticated()")
     public ProjectDetailDto deleteBudgetLine(@PathVariable UUID id,
                                               @PathVariable UUID lineId) {
         return projectService.deleteBudgetLine(id, lineId);
+    }
+
+    // ─── Progression ──────────────────────────────────────────────────────────
+
+    @PostMapping("/{id}/progressions")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ProjectDetailDto> addProgression(@PathVariable UUID id,
+                                                            @Valid @RequestBody ProgressionDto dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(projectService.addProgression(id, dto));
     }
 }

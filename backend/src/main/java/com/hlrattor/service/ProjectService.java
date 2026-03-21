@@ -1,16 +1,14 @@
 package com.hlrattor.service;
 
-import com.hlrattor.dto.*;
+import com.hlrattor.dto.ProjectDtos.*;
 import com.hlrattor.entity.*;
+import com.hlrattor.entity.AppUser.Role;
 import com.hlrattor.repository.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
+import com.hlrattor.service.ProjectExceptions.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -19,47 +17,55 @@ import java.util.UUID;
 @Transactional
 public class ProjectService {
 
-    private final ProjectRepository projectRepository;
-    private final BudgetLineRepository budgetLineRepository;
-    private final AppUserRepository userRepository;
+    private final ProjectRepository projectRepo;
+    private final ProjectStatusHistoryRepository statusHistoryRepo;
+    private final ProjectManagerHistoryRepository pmHistoryRepo;
+    private final DueDateHistoryRepository dueDateHistoryRepo;
+    private final BudgetLineRepository budgetLineRepo;
+    private final ProjectProgressionRepository progressionRepo;
+    private final AppUserRepository userRepo;
 
-    public ProjectService(ProjectRepository projectRepository,
-            BudgetLineRepository budgetLineRepository,
-            AppUserRepository userRepository) {
-        this.projectRepository = projectRepository;
-        this.budgetLineRepository = budgetLineRepository;
-        this.userRepository = userRepository;
+    public ProjectService(
+            ProjectRepository projectRepo,
+            ProjectStatusHistoryRepository statusHistoryRepo,
+            ProjectManagerHistoryRepository pmHistoryRepo,
+            DueDateHistoryRepository dueDateHistoryRepo,
+            BudgetLineRepository budgetLineRepo,
+            ProjectProgressionRepository progressionRepo,
+            AppUserRepository userRepo) {
+        this.projectRepo = projectRepo;
+        this.statusHistoryRepo = statusHistoryRepo;
+        this.pmHistoryRepo = pmHistoryRepo;
+        this.dueDateHistoryRepo = dueDateHistoryRepo;
+        this.budgetLineRepo = budgetLineRepo;
+        this.progressionRepo = progressionRepo;
+        this.userRepo = userRepo;
     }
 
-    // -------------------------------------------------------------------------
-    // Queries
-    // -------------------------------------------------------------------------
+    // ─── Queries ──────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
     public List<ProjectSummaryDto> listProjects() {
-        return projectRepository.findAll().stream()
-                .map(this::toSummaryDto)
+        return projectRepo.findAll().stream()
+                .map(this::toSummary)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public ProjectDetailDto getProject(UUID id) {
-        Project project = findProjectOrThrow(id);
-        return toDetailDto(project);
+        Project project = requireProject(id);
+        return toDetail(project);
     }
 
-    // -------------------------------------------------------------------------
-    // Create
-    // -------------------------------------------------------------------------
+    // ─── Create ───────────────────────────────────────────────────────────────
 
     public ProjectDetailDto createProject(CreateProjectDto dto) {
-        AppUser actor = currentUser();
-
-        if (projectRepository.existsByReference(dto.reference())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Project reference already exists");
+        if (projectRepo.existsByReference(dto.reference())) {
+            throw new DuplicateReferenceException(dto.reference());
         }
 
-        AppUser pm = findEnabledProjectManagerOrThrow(dto.projectManagerId());
+        AppUser currentUser = currentUser();
+        AppUser pm = requireProjectManager(dto.projectManagerId());
 
         Project project = new Project();
         project.setName(dto.name());
@@ -67,329 +73,328 @@ public class ProjectService {
         project.setSciformaCode(dto.sciformaCode());
         project.setPordBia(dto.pordBia());
         project.setPordProject(dto.pordProject());
-        project.setCreatedBy(actor);
+        project.setCreatedBy(currentUser);
+        project = projectRepo.save(project);
 
         // Initial status history
         ProjectStatusHistory statusEntry = new ProjectStatusHistory();
         statusEntry.setProject(project);
         statusEntry.setStatus(dto.initialStatus());
         statusEntry.setBusinessDate(dto.statusDate());
-        statusEntry.setChangedBy(actor);
-        project.getStatusHistory().add(statusEntry);
+        statusEntry.setChangedBy(currentUser);
+        statusHistoryRepo.save(statusEntry);
 
         // Initial project manager history
         ProjectManagerHistory pmEntry = new ProjectManagerHistory();
         pmEntry.setProject(project);
         pmEntry.setProjectManager(pm);
         pmEntry.setStartDate(dto.statusDate());
-        pmEntry.setAssignedBy(actor);
-        project.getManagerHistory().add(pmEntry);
+        pmEntry.setAssignedBy(currentUser);
+        pmHistoryRepo.save(pmEntry);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    // -------------------------------------------------------------------------
-    // Update project fields
-    // -------------------------------------------------------------------------
+    // ─── Update project fields ────────────────────────────────────────────────
 
     public ProjectDetailDto updateProject(UUID id, UpdateProjectDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
+        Project project = requireProject(id);
+        requireEditable(project);
+        requireAuthorized(project);
 
-        assertNotReadOnly(project);
-        assertCanEdit(project, actor);
-
-        boolean isAdmin = hasRole(actor, AppUser.Role.ADMIN);
+        boolean isAdmin = currentUserIsAdmin();
 
         if (isAdmin) {
-            if (dto.name() != null) {
+            if (dto.name() != null)
                 project.setName(dto.name());
-            }
             if (dto.reference() != null) {
-                if (projectRepository.existsByReferenceAndIdNot(dto.reference(), id)) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Project reference already exists");
+                if (!dto.reference().equals(project.getReference())
+                        && projectRepo.existsByReferenceAndIdNot(dto.reference(), id)) {
+                    throw new DuplicateReferenceException(dto.reference());
                 }
                 project.setReference(dto.reference());
             }
         }
 
-        // Both ADMIN and assigned PM can update these
-        if (dto.sciformaCode() != null) {
+        // Both roles can update
+        if (dto.sciformaCode() != null)
             project.setSciformaCode(dto.sciformaCode());
-        }
-        if (dto.pordBia() != null) {
+        if (dto.pordBia() != null)
             project.setPordBia(dto.pordBia());
-        }
-        if (dto.pordProject() != null) {
+        if (dto.pordProject() != null)
             project.setPordProject(dto.pordProject());
-        }
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(projectRepo.save(project));
     }
 
-    // -------------------------------------------------------------------------
-    // Status change
-    // -------------------------------------------------------------------------
+    // ─── Status ───────────────────────────────────────────────────────────────
 
     public ProjectDetailDto changeStatus(UUID id, StatusChangeDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
-
-        // Read-only projects can only transition back to an active status
-        if (project.isReadOnly() && dto.status().isReadOnly()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "This project is closed or canceled. Change its status to edit it.");
-        }
-
-        assertCanEdit(project, actor);
+        Project project = requireProject(id);
+        requireAuthorized(project);
 
         ProjectStatusHistory entry = new ProjectStatusHistory();
         entry.setProject(project);
         entry.setStatus(dto.status());
         entry.setBusinessDate(dto.businessDate());
-        entry.setChangedBy(actor);
-        project.getStatusHistory().add(entry);
+        entry.setChangedBy(currentUser());
+        statusHistoryRepo.save(entry);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    // -------------------------------------------------------------------------
-    // Project manager change
-    // -------------------------------------------------------------------------
+    // ─── Project manager ──────────────────────────────────────────────────────
 
     public ProjectDetailDto changeProjectManager(UUID id, ProjectManagerChangeDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
-
-        assertNotReadOnly(project);
-
-        AppUser newPm = findEnabledProjectManagerOrThrow(dto.projectManagerId());
+        Project project = requireProject(id);
+        AppUser newPm = requireProjectManager(dto.projectManagerId());
 
         // Close current active entry
-        project.getManagerHistory().stream()
-                .filter(h -> h.getEndDate() == null)
-                .forEach(h -> h.setEndDate(LocalDate.now()));
+        pmHistoryRepo.findByProjectIdAndEndDateIsNull(id)
+                .ifPresent(current -> {
+                    current.setEndDate(LocalDate.now());
+                    pmHistoryRepo.save(current);
+                });
 
         // Open new entry
-        ProjectManagerHistory newEntry = new ProjectManagerHistory();
-        newEntry.setProject(project);
-        newEntry.setProjectManager(newPm);
-        newEntry.setStartDate(LocalDate.now());
-        newEntry.setAssignedBy(actor);
-        project.getManagerHistory().add(newEntry);
+        ProjectManagerHistory entry = new ProjectManagerHistory();
+        entry.setProject(project);
+        entry.setProjectManager(newPm);
+        entry.setStartDate(LocalDate.now());
+        entry.setAssignedBy(currentUser());
+        pmHistoryRepo.save(entry);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    // -------------------------------------------------------------------------
-    // Due date change
-    // -------------------------------------------------------------------------
+    // ─── Due date ─────────────────────────────────────────────────────────────
 
     public ProjectDetailDto changeDueDate(UUID id, DueDateChangeDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
-
-        assertNotReadOnly(project);
-        assertCanEdit(project, actor);
+        Project project = requireProject(id);
+        requireEditable(project);
+        requireAuthorized(project);
 
         DueDateHistory entry = new DueDateHistory();
         entry.setProject(project);
         entry.setDueDate(dto.dueDate());
-        entry.setChangedBy(actor);
-        project.getDueDateHistory().add(entry);
+        entry.setChangedBy(currentUser());
+        dueDateHistoryRepo.save(entry);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    // -------------------------------------------------------------------------
-    // Budget lines
-    // -------------------------------------------------------------------------
+    // ─── Budget lines ─────────────────────────────────────────────────────────
 
     public ProjectDetailDto addBudgetLine(UUID id, BudgetLineDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
-
-        assertNotReadOnly(project);
-        assertCanEdit(project, actor);
+        Project project = requireProject(id);
+        requireEditable(project);
+        requireAuthorized(project);
 
         BudgetLine line = new BudgetLine();
         line.setProject(project);
         line.setType(dto.type());
         line.setAmount(dto.amount());
         line.setDate(dto.date());
-        line.setPordReference(dto.pordReference());
-        line.setCreatedBy(actor);
-        project.getBudgetLines().add(line);
+        line.setCreatedBy(currentUser());
+        budgetLineRepo.save(line);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    public ProjectDetailDto updateBudgetLine(UUID id, UUID lineId, BudgetLineDto dto) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
+    public ProjectDetailDto updateBudgetLine(UUID projectId, UUID lineId, BudgetLineDto dto) {
+        Project project = requireProject(projectId);
+        requireEditable(project);
+        requireAuthorized(project);
 
-        assertNotReadOnly(project);
-        assertCanEdit(project, actor);
-
-        BudgetLine line = project.getBudgetLines().stream()
-                .filter(l -> l.getId().equals(lineId))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Budget line not found"));
+        BudgetLine line = budgetLineRepo.findById(lineId)
+                .filter(l -> l.getProject().getId().equals(projectId))
+                .orElseThrow(() -> new BudgetLineNotFoundException(lineId));
 
         line.setType(dto.type());
         line.setAmount(dto.amount());
         line.setDate(dto.date());
-        line.setPordReference(dto.pordReference());
-        line.setUpdatedBy(actor);
+        line.setUpdatedBy(currentUser());
+        budgetLineRepo.save(line);
 
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return toDetail(project);
     }
 
-    public ProjectDetailDto deleteBudgetLine(UUID id, UUID lineId) {
-        AppUser actor = currentUser();
-        Project project = findProjectOrThrow(id);
+    public ProjectDetailDto deleteBudgetLine(UUID projectId, UUID lineId) {
+        Project project = requireProject(projectId);
+        requireEditable(project);
+        requireAuthorized(project);
 
-        assertNotReadOnly(project);
-        assertCanEdit(project, actor);
+        BudgetLine line = budgetLineRepo.findById(lineId)
+                .filter(l -> l.getProject().getId().equals(projectId))
+                .orElseThrow(() -> new BudgetLineNotFoundException(lineId));
 
-        boolean removed = project.getBudgetLines()
-                .removeIf(l -> l.getId().equals(lineId));
+        budgetLineRepo.delete(line);
+        return toDetail(project);
+    }
 
-        if (!removed) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Budget line not found");
+    // ─── Progression ──────────────────────────────────────────────────────────
+
+    public ProjectDetailDto addProgression(UUID id, ProgressionDto dto) {
+        Project project = requireProject(id);
+        requireEditable(project);
+        requireAuthorized(project);
+
+        ProjectProgression entry = new ProjectProgression();
+        entry.setProject(project);
+        entry.setProgressionValue(dto.progressionValue());
+        entry.setProgressionDate(dto.progressionDate());
+        entry.setRecordedBy(currentUser());
+        progressionRepo.save(entry);
+
+        return toDetail(project);
+    }
+
+    // ─── Internal helpers ─────────────────────────────────────────────────────
+
+    private Project requireProject(UUID id) {
+        return projectRepo.findById(id).orElseThrow(() -> new ProjectNotFoundException(id));
+    }
+
+    private AppUser requireProjectManager(UUID userId) {
+        AppUser user = userRepo.findById(userId)
+                .orElseThrow(() -> new InvalidProjectManagerException());
+        if (!user.isEnabled() || !user.hasRole(Role.PROJECT_MANAGER)) {
+            throw new InvalidProjectManagerException();
         }
-
-        projectRepository.save(project);
-        return toDetailDto(project);
+        return user;
     }
 
-    // -------------------------------------------------------------------------
-    // Mapping
-    // -------------------------------------------------------------------------
-
-    private ProjectSummaryDto toSummaryDto(Project p) {
-        BigDecimal total = budgetLineRepository.sumAmountByProjectId(p.getId());
-
-        AppUser pm = p.currentProjectManager();
-        List<DueDateHistory> ddHistory = p.getDueDateHistory();
-        LocalDate currentDueDate = ddHistory.isEmpty()
-                ? null
-                : ddHistory.get(ddHistory.size() - 1).getDueDate();
-
-        return new ProjectSummaryDto(
-                p.getId(),
-                p.getReference(),
-                p.getName(),
-                p.currentStatus(),
-                pm != null ? pm.getUsername() : null,
-                currentDueDate,
-                total);
-    }
-
-    private ProjectDetailDto toDetailDto(Project p) {
-        BigDecimal total = p.getBudgetLines().stream()
-                .map(BudgetLine::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        AppUser pm = p.currentProjectManager();
-        List<DueDateHistory> ddHistory = p.getDueDateHistory();
-        LocalDate currentDueDate = ddHistory.isEmpty()
-                ? null
-                : ddHistory.get(ddHistory.size() - 1).getDueDate();
-
-        List<ProjectStatusHistoryDto> statusHistory = p.getStatusHistory().stream()
-                .map(h -> new ProjectStatusHistoryDto(
-                        h.getId(), h.getStatus(), h.getBusinessDate(),
-                        h.getChangedBy().getUsername(), h.getChangedAt()))
-                .toList();
-
-        List<ProjectManagerHistoryDto> managerHistory = p.getManagerHistory().stream()
-                .map(h -> new ProjectManagerHistoryDto(
-                        h.getId(), h.getProjectManager().getUsername(),
-                        h.getStartDate(), h.getEndDate(),
-                        h.getAssignedBy().getUsername(), h.getAssignedAt()))
-                .toList();
-
-        List<DueDateHistoryDto> dueDateHistory = p.getDueDateHistory().stream()
-                .map(h -> new DueDateHistoryDto(
-                        h.getId(), h.getDueDate(),
-                        h.getChangedBy().getUsername(), h.getChangedAt()))
-                .toList();
-
-        List<BudgetLineResponseDto> budgetLines = p.getBudgetLines().stream()
-                .map(l -> new BudgetLineResponseDto(
-                        l.getId(), l.getType(), l.getAmount(), l.getDate(),
-                        l.getPordReference(),
-                        l.getCreatedBy().getUsername(), l.getCreatedAt(),
-                        l.getUpdatedBy() != null ? l.getUpdatedBy().getUsername() : null,
-                        l.getUpdatedAt()))
-                .toList();
-
-        return new ProjectDetailDto(
-                p.getId(), p.getReference(), p.getName(),
-                p.getSciformaCode(), p.getPordBia(), p.getPordProject(),
-                p.getCreatedBy().getUsername(), p.getCreatedAt(),
-                p.currentStatus(),
-                pm != null ? pm.getUsername() : null,
-                currentDueDate, total,
-                statusHistory, managerHistory, dueDateHistory, budgetLines);
-    }
-
-    // -------------------------------------------------------------------------
-    // Authorization helpers
-    // -------------------------------------------------------------------------
-
-    private void assertNotReadOnly(Project project) {
-        if (project.isReadOnly()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "This project is closed or canceled. Change its status to edit it.");
+    private void requireEditable(Project project) {
+        ProjectStatus current = statusHistoryRepo
+                .findTopByProjectIdOrderByChangedAtDesc(project.getId())
+                .map(ProjectStatusHistory::getStatus)
+                .orElse(ProjectStatus.DRAFT);
+        if (current.isReadOnly()) {
+            throw new ProjectReadOnlyException();
         }
     }
 
-    private void assertCanEdit(Project project, AppUser actor) {
-        if (hasRole(actor, AppUser.Role.ADMIN)) {
+    private void requireAuthorized(Project project) {
+        if (currentUserIsAdmin())
             return;
+        // Must be the assigned PM
+        boolean isAssigned = pmHistoryRepo
+                .findByProjectIdAndEndDateIsNull(project.getId())
+                .map(h -> h.getProjectManager().getUsername().equals(currentUsername()))
+                .orElse(false);
+        if (!isAssigned) {
+            throw new UnauthorizedProjectAccessException();
         }
-        AppUser currentPm = project.currentProjectManager();
-        if (currentPm != null && currentPm.getId().equals(actor.getId())) {
-            return;
-        }
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "You are not authorized to edit this project");
     }
 
-    private boolean hasRole(AppUser user, AppUser.Role role) {
-        return user.hasRole(role);
+    private boolean currentUserIsAdmin() {
+        return SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    private String currentUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     private AppUser currentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+        return userRepo.findByUsername(currentUsername())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user not found"));
     }
 
-    private Project findProjectOrThrow(UUID id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+    // ─── Mapping ──────────────────────────────────────────────────────────────
+
+    private ProjectSummaryDto toSummary(Project project) {
+        UUID id = project.getId();
+
+        ProjectStatus currentStatus = statusHistoryRepo
+                .findTopByProjectIdOrderByChangedAtDesc(id)
+                .map(ProjectStatusHistory::getStatus)
+                .orElse(null);
+
+        String currentPm = pmHistoryRepo
+                .findByProjectIdAndEndDateIsNull(id)
+                .map(h -> h.getProjectManager().getUsername())
+                .orElse(null);
+
+        LocalDate currentDueDate = dueDateHistoryRepo
+                .findTopByProjectIdOrderByChangedAtDesc(id)
+                .map(DueDateHistory::getDueDate)
+                .orElse(null);
+
+        Integer currentProgression = progressionRepo
+                .findTopByProjectIdOrderByProgressionDateDescRecordedAtDesc(id)
+                .map(ProjectProgression::getProgressionValue)
+                .orElse(null);
+
+        var totalBudget = budgetLineRepo.sumAmountByProjectId(id);
+
+        return new ProjectSummaryDto(id, project.getReference(), project.getName(),
+                currentStatus, currentPm, currentDueDate, currentProgression, totalBudget);
     }
 
-    private AppUser findEnabledProjectManagerOrThrow(UUID id) {
-        AppUser user = userRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-        if (!user.isEnabled()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is disabled");
-        }
-        if (!hasRole(user, AppUser.Role.PROJECT_MANAGER)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected user is not a project manager");
-        }
-        return user;
+    private ProjectDetailDto toDetail(Project project) {
+        UUID id = project.getId();
+
+        ProjectStatus currentStatus = statusHistoryRepo
+                .findTopByProjectIdOrderByChangedAtDesc(id)
+                .map(ProjectStatusHistory::getStatus)
+                .orElse(null);
+
+        String currentPm = pmHistoryRepo
+                .findByProjectIdAndEndDateIsNull(id)
+                .map(h -> h.getProjectManager().getUsername())
+                .orElse(null);
+
+        LocalDate currentDueDate = dueDateHistoryRepo
+                .findTopByProjectIdOrderByChangedAtDesc(id)
+                .map(DueDateHistory::getDueDate)
+                .orElse(null);
+
+        Integer currentProgression = progressionRepo
+                .findTopByProjectIdOrderByProgressionDateDescRecordedAtDesc(id)
+                .map(ProjectProgression::getProgressionValue)
+                .orElse(null);
+
+        var totalBudget = budgetLineRepo.sumAmountByProjectId(id);
+
+        List<ProjectStatusHistoryDto> statusHistory = statusHistoryRepo
+                .findByProjectIdOrderByChangedAtAsc(id).stream()
+                .map(h -> new ProjectStatusHistoryDto(h.getId(), h.getStatus(),
+                        h.getBusinessDate(), h.getChangedBy().getUsername(), h.getChangedAt()))
+                .toList();
+
+        List<ProjectManagerHistoryDto> pmHistory = pmHistoryRepo
+                .findByProjectIdOrderByStartDateAsc(id).stream()
+                .map(h -> new ProjectManagerHistoryDto(h.getId(),
+                        h.getProjectManager().getUsername(), h.getStartDate(), h.getEndDate(),
+                        h.getAssignedBy().getUsername(), h.getAssignedAt()))
+                .toList();
+
+        List<DueDateHistoryDto> dueDateHistory = dueDateHistoryRepo
+                .findByProjectIdOrderByChangedAtAsc(id).stream()
+                .map(h -> new DueDateHistoryDto(h.getId(), h.getDueDate(),
+                        h.getChangedBy().getUsername(), h.getChangedAt()))
+                .toList();
+
+        List<BudgetLineResponseDto> budgetLines = budgetLineRepo
+                .findByProjectIdOrderByDateAsc(id).stream()
+                .map(b -> new BudgetLineResponseDto(b.getId(), b.getType(), b.getAmount(),
+                        b.getDate(), b.getCreatedBy().getUsername(), b.getCreatedAt(),
+                        b.getUpdatedBy() != null ? b.getUpdatedBy().getUsername() : null,
+                        b.getUpdatedAt()))
+                .toList();
+
+        List<ProgressionResponseDto> progressionHistory = progressionRepo
+                .findByProjectIdOrderByProgressionDateAsc(id).stream()
+                .map(p -> new ProgressionResponseDto(p.getId(), p.getProgressionValue(),
+                        p.getProgressionDate(), p.getRecordedBy().getUsername(), p.getRecordedAt()))
+                .toList();
+
+        return new ProjectDetailDto(id, project.getReference(), project.getName(),
+                project.getSciformaCode(), project.getPordBia(), project.getPordProject(),
+                project.getCreatedBy().getUsername(), project.getCreatedAt(),
+                currentStatus, currentPm, currentDueDate, currentProgression, totalBudget,
+                statusHistory, pmHistory, dueDateHistory, budgetLines, progressionHistory);
     }
 }

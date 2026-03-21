@@ -1,6 +1,8 @@
 package com.hlrattor.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.UuidGenerator;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -10,11 +12,12 @@ import java.util.UUID;
 public class ProjectManagerHistory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @UuidGenerator
+    @Column(nullable = false, updatable = false)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = false, updatable = false)
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -28,18 +31,18 @@ public class ProjectManagerHistory {
     private LocalDate endDate;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "assigned_by_id", nullable = false)
+    @JoinColumn(name = "assigned_by", nullable = false, updatable = false)
     private AppUser assignedBy;
 
     @Column(name = "assigned_at", nullable = false, updatable = false)
     private Instant assignedAt;
 
     @PrePersist
-    protected void onCreate() {
+    void prePersist() {
         assignedAt = Instant.now();
     }
 
-    // Getters & Setters
+    // Getters and setters
 
     public UUID getId() {
         return id;

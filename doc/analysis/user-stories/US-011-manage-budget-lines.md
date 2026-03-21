@@ -13,12 +13,12 @@ So that the financial history of the project is accurately maintained.
 ## Acceptance Criteria
 
 - Given I am on the project detail page and the project is editable
-  - When I add a new budget line with a type, an amount, a date, and an optional PORD reference
+  - When I add a new budget line with a type, an amount, and a date
   - Then the budget line is saved
   - And the project's total budget is updated accordingly
 
 - Given I view the budget section of a project
-  - Then I see all budget lines with their type, amount, date, and PORD reference (if any)
+  - Then I see all budget lines with their type, amount, and date
   - And the total budget is displayed as the sum of all lines
 
 - Given I edit an existing budget line
@@ -39,6 +39,5 @@ So that the financial history of the project is accurately maintained.
 ## Notes
 
 - Budget line types: ENGAGEMENT_INITIAL, COMMANDE_COMPLEMENTAIRE, TRANSFERT.
-- The PORD reference on a budget line is free text and optional for all types.
 - The total budget is always computed as the sum of all budget lines (server-side).
 - Both ADMIN and the assigned PROJECT_MANAGER can manage budget lines.

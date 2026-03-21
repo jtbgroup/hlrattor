@@ -1,121 +1,53 @@
-@use 'styles/variables' as *;
+.project-list-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
-// ── Page header ───────────────────────────────────────────────────────────────
-
-.page-header {
+.list-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
 }
-
-.page-title {
-  margin: 0;
-  font-size: $font-size-2xl;
-  font-weight: $font-weight-bold;
-  color: $color-brand-deep;
-}
-
-// ── Error ─────────────────────────────────────────────────────────────────────
-
-.list-error {
-  background: $color-error-bg;
-  border: 1px solid $color-error-border;
-  color: $color-error-text;
-  border-radius: $border-radius-md;
-  padding: 10px 16px;
-  margin-bottom: 16px;
-  font-size: $font-size-sm;
-}
-
-// ── Filters ───────────────────────────────────────────────────────────────────
 
 .filters {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
 
-  mat-form-field { width: 220px; }
+  mat-form-field {
+    min-width: 200px;
+  }
 }
 
-// ── Table card ────────────────────────────────────────────────────────────────
-
-.table-card {
-  background: $color-bg-white;
-  border-radius: $border-radius-lg;
-  border: 1px solid $table-card-border;
-  box-shadow: $shadow-card-md;
-  overflow: hidden;
-}
-
-.project-table {
+.full-width {
   width: 100%;
+}
 
-  .mat-mdc-header-row {
-    background: $table-header-bg;
-  }
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s;
 
-  .mat-mdc-header-cell {
-    color: $table-header-color;
-    font-weight: $font-weight-bold;
-    font-size: $font-size-xxs;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border-bottom: 2px solid $table-header-border;
-  }
-
-  .mat-mdc-row {
-    transition: background 0.12s ease;
-    &:hover { background: $table-row-hover; }
-  }
-
-  .mat-mdc-cell {
-    border-bottom-color: $table-cell-border;
-    color: $color-text;
-    font-size: $font-size-sm;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
   }
 }
 
-.clickable-row { cursor: pointer; }
-
-// ── Status badges ─────────────────────────────────────────────────────────────
-
-.status-badge {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: $font-weight-bold;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  border-radius: $border-radius-pill;
-  padding: 3px 10px;
-
-  &.status-draft    { background: #e3f2fd; color: #1565c0; }
-  &.status-bia      { background: #fff8e1; color: #f57f17; }
-  &.status-project  { background: $color-success-bg; color: $color-success-text; }
-  &.status-canceled { background: $color-warning-bg; color: $color-warning-text; }
-  &.status-closed   { background: #f5f5f5; color: #616161; }
-}
-
-// ── Empty state ───────────────────────────────────────────────────────────────
-
-.empty-state {
+.spinner-wrapper {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 48px 24px;
-  color: rgba(0, 0, 0, 0.4);
+  padding: 48px;
+}
 
-  .empty-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
-    opacity: 0.35;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.95rem;
-  }
+.no-data {
+  text-align: center;
+  padding: 32px;
+  color: rgba(0, 0, 0, 0.54);
 }

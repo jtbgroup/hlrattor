@@ -2,7 +2,7 @@
 
 ## Summary
 
-Allows an ADMIN to create and manage projects. A project has a unique reference, a name, a Sciforma imputation code, two optional PORD references (BIA and Project phases), a status with full history, a project manager (with history), a due date (with history), and a set of budget lines whose sum constitutes the total budget. The project manager assigned to a project can also edit most of its fields.
+Allows an ADMIN to create and manage projects. A project has a unique reference, a name, a Sciforma imputation code, two optional PORD references (BIA and Project phases), a status with full history, a project manager (with history), a due date (with history), a set of budget lines whose sum constitutes the total budget, and a progression history tracking the completion percentage over time.
 
 ## Actors
 
@@ -47,6 +47,7 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 | Status | ✅ | ✅ |
 | Due date | ✅ | ✅ |
 | Budget lines | ✅ | ✅ |
+| Progression | ✅ | ✅ |
 
 ## Main Flow — Change Project Manager
 
@@ -70,10 +71,18 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 ## Main Flow — Manage Budget Lines
 
 1. An authorized actor adds, edits, or removes a budget line on the project.
-2. Each budget line contains: `type`, `amount`, `date`, and an optional `pordReference`.
+2. Each budget line contains: `type`, `amount`, and `date`.
 3. Budget line types: `ENGAGEMENT_INITIAL`, `COMMANDE_COMPLEMENTAIRE`, `TRANSFERT`.
 4. The total budget is always computed as the sum of all budget lines.
 5. The system confirms the change and refreshes the total budget display.
+
+## Main Flow — Record Progression
+
+1. An authorized actor navigates to the Progression section of the project detail page.
+2. The actor enters a progression value (integer percentage, 0–100) and a progression date.
+3. The backend validates the input and creates a new `ProjectProgression` entry.
+4. The system confirms the entry and displays the updated progression history.
+5. The current progression is derived from the most recent entry by date.
 
 ## Alternative Flow — Reference Already Exists (Create)
 
@@ -93,6 +102,12 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 2. The backend rejects the request.
 3. The system displays: *"The selected user is not a project manager"*.
 
+## Alternative Flow — Invalid Progression Value
+
+1. An actor submits a progression value outside the 0–100 range.
+2. The backend rejects the request with a validation error.
+3. The system displays a field-level error message.
+
 ## Postconditions
 
 - **Create project**: Project exists in the database with initial status and project manager history entries.
@@ -100,6 +115,7 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 - **Change status**: New status is active; full history with manual dates is preserved.
 - **Change due date**: New due date is active; full history is preserved.
 - **Budget lines**: Total budget reflects the sum of all lines.
+- **Progression**: New progression entry is recorded; full history is preserved.
 
 ## Non-functional Requirements
 
@@ -108,3 +124,4 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 - Only users with role PROJECT_MANAGER are selectable as project manager.
 - Authorization is enforced server-side on every endpoint.
 - A project in `CLOSED` or `CANCELED` status is read-only except for a status transition back to an active status.
+- Progression values must be between 0 and 100 inclusive (validated server-side).

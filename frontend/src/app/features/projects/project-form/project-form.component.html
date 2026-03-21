@@ -1,123 +1,86 @@
-<div class="page-header">
-  <button mat-icon-button class="btn-back" (click)="cancel()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <h2 class="page-title">
-    {{ (isEdit ? 'projectForm.titleEdit' : 'projectForm.titleCreate') | translate }}
-  </h2>
-</div>
+<h2 mat-dialog-title>Créer un projet</h2>
 
-@if (loading) {
-  <div class="loading">{{ 'projectForm.loading' | translate }}</div>
-}
+<mat-dialog-content [formGroup]="form">
 
-@if (!loading) {
-
-  @if (!isEdit) {
-    <div class="draft-notice">
-      <mat-icon>info_outline</mat-icon>
-      <span>{{ 'projectForm.draftNotice' | translate }}</span>
-    </div>
+  @if (errorMessage) {
+    <p class="error-banner">{{ errorMessage }}</p>
   }
 
-  @if (isReadOnly) {
-    <div class="draft-notice" style="background:#fff3e0;color:#e65100;border-left-color:#e65100;">
-      <mat-icon>lock</mat-icon>
-      <span>{{ 'projectDetail.readonlyBanner' | translate }}</span>
-    </div>
-  }
-
-  <div class="form-card">
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="project-form">
-
-      <!-- Name -->
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'projectForm.fieldName' | translate }} *</mat-label>
-        <input matInput formControlName="name" />
-        @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
-          <mat-error>{{ 'projectForm.errorNameRequired' | translate }}</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Reference -->
-      <mat-form-field appearance="outline">
-        <mat-label>Reference *</mat-label>
-        <input matInput formControlName="reference" />
-        @if (form.get('reference')?.hasError('required') && form.get('reference')?.touched) {
-          <mat-error>Reference is required</mat-error>
-        }
-      </mat-form-field>
-
-      <!-- Sciforma Code -->
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'projectForm.fieldSciformaCode' | translate }} *</mat-label>
-        <input matInput formControlName="sciformaCode" />
-      </mat-form-field>
-
-      <!-- PORD BIA -->
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'projectForm.fieldPordBia' | translate }}</mat-label>
-        <input matInput formControlName="pordBia" />
-      </mat-form-field>
-
-      <!-- PORD Project -->
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'projectForm.fieldPordProject' | translate }}</mat-label>
-        <input matInput formControlName="pordProject" />
-      </mat-form-field>
-
-      <!-- Creation-only fields -->
-      @if (!isEdit) {
-
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'projectForm.fieldProjectManager' | translate }} *</mat-label>
-          <mat-select formControlName="projectManagerId">
-            @for (pm of projectManagers; track pm.id) {
-              <mat-option [value]="pm.id">{{ pm.username }}</mat-option>
-            }
-          </mat-select>
-          @if (form.get('projectManagerId')?.hasError('required') && form.get('projectManagerId')?.touched) {
-            <mat-error>{{ 'projectForm.errorPmRequired' | translate }}</mat-error>
-          }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Initial Status</mat-label>
-          <mat-select formControlName="initialStatus">
-            @for (s of statuses; track s) {
-              <mat-option [value]="s">{{ s }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Status Date</mat-label>
-          <input matInput [matDatepicker]="statusDatePicker" formControlName="statusDate" />
-          <mat-datepicker-toggle matSuffix [for]="statusDatePicker"></mat-datepicker-toggle>
-          <mat-datepicker #statusDatePicker></mat-datepicker>
-        </mat-form-field>
-
+  <div class="form-grid">
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Nom *</mat-label>
+      <input matInput formControlName="name" placeholder="Nom du projet" />
+      @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+        <mat-error>Le nom est obligatoire.</mat-error>
       }
+    </mat-form-field>
 
-      @if (error) {
-        <div class="form-error">{{ error }}</div>
+    <mat-form-field appearance="outline">
+      <mat-label>Référence *</mat-label>
+      <input matInput formControlName="reference" placeholder="REF-001" />
+      @if (form.get('reference')?.hasError('required') && form.get('reference')?.touched) {
+        <mat-error>La référence est obligatoire.</mat-error>
       }
+    </mat-form-field>
 
-      <div class="form-actions">
-        <button mat-stroked-button type="button" (click)="cancel()" [disabled]="saving">
-          {{ 'projectForm.cancel' | translate }}
-        </button>
-        <button mat-flat-button class="btn-save" type="submit"
-                [disabled]="form.invalid || saving || isReadOnly">
-          @if (saving) {
-            <mat-spinner diameter="18" />
-          } @else {
-            {{ (isEdit ? 'projectForm.save' : 'projectForm.create') | translate }}
-          }
-        </button>
-      </div>
+    <mat-form-field appearance="outline">
+      <mat-label>Code Sciforma *</mat-label>
+      <input matInput formControlName="sciformaCode" />
+      @if (form.get('sciformaCode')?.hasError('required') && form.get('sciformaCode')?.touched) {
+        <mat-error>Le code Sciforma est obligatoire.</mat-error>
+      }
+    </mat-form-field>
 
-    </form>
+    <mat-form-field appearance="outline">
+      <mat-label>PORD BIA</mat-label>
+      <input matInput formControlName="pordBia" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>PORD Projet</mat-label>
+      <input matInput formControlName="pordProject" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full">
+      <mat-label>Chef de projet *</mat-label>
+      <mat-select formControlName="projectManagerId">
+        @for (pm of projectManagers; track pm.id) {
+          <mat-option [value]="pm.id">{{ pm.username }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('projectManagerId')?.hasError('required') && form.get('projectManagerId')?.touched) {
+        <mat-error>Le chef de projet est obligatoire.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Statut initial *</mat-label>
+      <mat-select formControlName="initialStatus">
+        @for (s of statuses; track s) {
+          <mat-option [value]="s">{{ statusLabels[s] }}</mat-option>
+        }
+      </mat-select>
+      @if (form.get('initialStatus')?.hasError('required') && form.get('initialStatus')?.touched) {
+        <mat-error>Le statut initial est obligatoire.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date de statut *</mat-label>
+      <input matInput [matDatepicker]="statusPicker" formControlName="statusDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="statusPicker" />
+      <mat-datepicker #statusPicker />
+      @if (form.get('statusDate')?.hasError('required') && form.get('statusDate')?.touched) {
+        <mat-error>La date de statut est obligatoire.</mat-error>
+      }
+    </mat-form-field>
   </div>
 
-}
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="saving">Annuler</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid || saving">
+    @if (saving) { <mat-spinner diameter="18" /> } @else { Créer }
+  </button>
+</mat-dialog-actions>

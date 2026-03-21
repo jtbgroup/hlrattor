@@ -1,232 +1,238 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { ProjectService } from '../../../core/services/project.service';
-import { UserService } from '../../../core/services/user.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { I18nService } from '../../../core/i18n/i18n.service';
-import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import {
-  BudgetLineEntry,
-  DueDateHistoryEntry,
-  ProjectDetail,
-  ProjectManagerHistoryEntry,
-  ProjectStatusHistoryEntry,
-  READ_ONLY_STATUSES,
-} from '../../../core/models/project.model';
-import { BudgetLineFormComponent } from '../budget-line-form/budget-line-form.component';
-import { StatusDialogComponent, StatusDialogData } from '../dialogs/status-dialog.component';
-import { PmDialogComponent, PmDialogData, PmDialogResult } from '../dialogs/pm-dialog.component';
-import { DueDateDialogComponent, DueDateDialogData } from '../dialogs/due-date-dialog.component';
+  ProjectService, ProjectDetail, ProjectStatus,
+  BudgetLineResponse,
+} from '../../../core/services/project.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { UserService, UserManagementDto } from '../../../core/services/user.service';
+import { BudgetLineFormComponent, BudgetLineDialogData } from '../budget-line-form/budget-line-form.component';
+import { ProgressionFormComponent } from '../progression-form/progression-form.component';
 
 @Component({
   selector: 'app-project-detail',
   standalone: true,
   imports: [
-    CommonModule,
-    MatButtonModule, MatIconModule,
-    MatDialogModule, MatSnackBarModule, MatTooltipModule,
-    TranslatePipe,
+    CommonModule, ReactiveFormsModule,
+    MatCardModule, MatButtonModule, MatIconModule, MatChipsModule,
+    MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule,
+    MatDatepickerModule, MatNativeDateModule, MatProgressSpinnerModule,
+    MatDialogModule, MatDividerModule, MatTooltipModule,
   ],
   templateUrl: './project-detail.component.html',
-  styleUrls: ['./project-detail.component.scss'],
+  styleUrl: './project-detail.component.scss',
 })
 export class ProjectDetailComponent implements OnInit {
-  project!: ProjectDetail;
-  loading = true;
-
-  isAdmin      = false;
-  isAssignedPm = false;
-  canEdit      = false;
-  isReadOnly   = false;
-
-  projectManagers: { id: string; username: string }[] = [];
-
-  private readonly route          = inject(ActivatedRoute);
-  private readonly router         = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly projectService = inject(ProjectService);
-  private readonly userService    = inject(UserService);
-  private readonly authService    = inject(AuthService);
-  private readonly i18n           = inject(I18nService);
-  private readonly dialog         = inject(MatDialog);
-  private readonly snackBar       = inject(MatSnackBar);
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  private readonly dialog = inject(MatDialog);
+  private readonly fb = inject(FormBuilder);
+
+  project = signal<ProjectDetail | null>(null);
+  loading = signal(true);
+  projectManagers = signal<UserManagementDto[]>([]);
+
+  // Inline form visibility flags
+  showStatusForm = false;
+  showPmForm = false;
+  showDueDateForm = false;
+  showHeaderEdit = false;
+
+  saving = signal(false);
+  errorMessage = signal('');
+
+  readonly statuses: ProjectStatus[] = ['DRAFT', 'BIA', 'PROJECT', 'CANCELED', 'CLOSED'];
+  readonly statusLabels: Record<ProjectStatus, string> = {
+    DRAFT: 'Brouillon', BIA: 'BIA', PROJECT: 'Projet',
+    CANCELED: 'Annulé', CLOSED: 'Clôturé',
+  };
+
+  readonly budgetColumns = ['type', 'amount', 'date', 'createdBy', 'actions'];
+  readonly statusColumns = ['status', 'businessDate', 'changedBy', 'changedAt'];
+  readonly pmColumns = ['projectManager', 'startDate', 'endDate', 'assignedBy'];
+  readonly dueDateColumns = ['dueDate', 'changedBy', 'changedAt'];
+  readonly progressionColumns = ['value', 'progressionDate', 'recordedBy', 'recordedAt'];
+
+  statusForm = this.fb.group({
+    status: ['' as ProjectStatus, Validators.required],
+    businessDate: [null as Date | null, Validators.required],
+  });
+
+  pmForm = this.fb.group({
+    projectManagerId: ['', Validators.required],
+  });
+
+  dueDateForm = this.fb.group({
+    dueDate: [null as Date | null, Validators.required],
+  });
+
+  headerForm = this.fb.group({
+    name: ['', Validators.required],
+    reference: ['', Validators.required],
+    sciformaCode: ['', Validators.required],
+    pordBia: [''],
+    pordProject: [''],
+  });
+
+  get isAdmin(): boolean { return this.authService.hasRole('ADMIN'); }
+  get currentUsername(): string { return this.authService.currentUser()?.username ?? ''; }
+
+  get isAssignedPm(): boolean {
+    return this.project()?.currentProjectManager === this.currentUsername;
+  }
+
+  get canEdit(): boolean { return this.isAdmin || this.isAssignedPm; }
+
+  get isReadOnly(): boolean {
+    const s = this.project()?.currentStatus;
+    return s === 'CANCELED' || s === 'CLOSED';
+  }
 
   ngOnInit(): void {
-    this.isAdmin = this.authService.hasRole('ADMIN');
     const id = this.route.snapshot.paramMap.get('id')!;
-    this.load(id);
-
-    if (this.isAdmin) {
-      this.userService.listUsers().subscribe(users => {
-        this.projectManagers = users
-          .filter(u => u.roles?.includes('PROJECT_MANAGER') && u.enabled)
-          .map(u => ({ id: u.id, username: u.username }));
-      });
-    }
-  }
-
-  load(id: string): void {
-    this.loading = true;
-    this.projectService.getProject(id).subscribe(p => {
-      this.project      = p;
-      this.loading      = false;
-      const me          = this.authService.currentUser();
-      this.isAssignedPm = p.currentProjectManager === me?.username;
-      this.canEdit      = this.isAdmin || this.isAssignedPm;
-      this.isReadOnly   = READ_ONLY_STATUSES.includes(p.currentStatus);
+    this.loadProject(id);
+    this.userService.listUsers().subscribe(users => {
+      this.projectManagers.set(users.filter(u => u.roles.includes('PROJECT_MANAGER') && u.enabled));
     });
   }
 
-  goBack(): void  { this.router.navigate(['/projects']); }
-  goToEdit(): void { this.router.navigate(['/projects', this.project.id, 'edit']); }
-
-  // ── Status ────────────────────────────────────────────────────────────────
-
-  openStatusDialog(existing?: ProjectStatusHistoryEntry): void {
-    const data: StatusDialogData = existing
-      ? { status: existing.status, businessDate: existing.businessDate }
-      : {};
-    const ref = this.dialog.open(StatusDialogComponent, { width: '400px', data });
-    ref.afterClosed().subscribe(payload => {
-      if (!payload) return;
-      this.projectService.changeStatus(this.project.id, payload).subscribe({
-        next: p => {
-          this.project    = p;
-          this.isReadOnly = READ_ONLY_STATUSES.includes(p.currentStatus);
-          this.snack('projectDetail.statusUpdated');
-        },
-        error: err => this.snackError(err),
-      });
+  loadProject(id: string): void {
+    this.loading.set(true);
+    this.projectService.getProject(id).subscribe({
+      next: p => {
+        this.project.set(p);
+        this.patchHeaderForm(p);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
     });
   }
 
-  // ── Project Manager ───────────────────────────────────────────────────────
-
-  openPmDialog(existing?: ProjectManagerHistoryEntry): void {
-    const data: PmDialogData = {
-      projectManagers: this.projectManagers,
-      currentPmId:     existing ? this.pmIdByUsername(existing.projectManager) : undefined,
-      startDate:       existing?.startDate,
-    };
-    const ref = this.dialog.open(PmDialogComponent, { width: '400px', data });
-    ref.afterClosed().subscribe((result: PmDialogResult | null) => {
-      if (!result) return;
-      this.projectService.changeProjectManager(this.project.id, { projectManagerId: result.projectManagerId }).subscribe({
-        next: p => { this.project = p; this.snack('projectDetail.pmUpdated'); },
-        error: err => this.snackError(err),
-      });
+  private patchHeaderForm(p: ProjectDetail): void {
+    this.headerForm.patchValue({
+      name: p.name,
+      reference: p.reference,
+      sciformaCode: p.sciformaCode,
+      pordBia: p.pordBia ?? '',
+      pordProject: p.pordProject ?? '',
     });
   }
 
-  // ── Due Date ──────────────────────────────────────────────────────────────
+  // ── Header edit ──────────────────────────────────────────────────────────
 
-  openDueDateDialog(existing?: DueDateHistoryEntry): void {
-    const data: DueDateDialogData = { dueDate: existing?.dueDate };
-    const ref = this.dialog.open(DueDateDialogComponent, { width: '400px', data });
-    ref.afterClosed().subscribe(payload => {
-      if (!payload) return;
-      this.projectService.changeDueDate(this.project.id, payload).subscribe({
-        next: p => { this.project = p; this.snack('projectDetail.dueDateUpdated'); },
-        error: err => this.snackError(err),
-      });
+  saveHeader(): void {
+    if (this.headerForm.invalid) return;
+    const v = this.headerForm.getRawValue();
+    this.saving.set(true);
+    this.projectService.updateProject(this.project()!.id, {
+      name: this.isAdmin ? v.name! : undefined,
+      reference: this.isAdmin ? v.reference! : undefined,
+      sciformaCode: v.sciformaCode!,
+      pordBia: v.pordBia || undefined,
+      pordProject: v.pordProject || undefined,
+    }).subscribe({
+      next: p => { this.project.set(p); this.showHeaderEdit = false; this.saving.set(false); },
+      error: err => { this.errorMessage.set(err.error?.message ?? 'Erreur'); this.saving.set(false); },
     });
   }
 
-  // ── History delete ────────────────────────────────────────────────────────
+  // ── Status ───────────────────────────────────────────────────────────────
 
-  deleteStatusEntry(h: ProjectStatusHistoryEntry): void {
-    const msg = this.i18n.translate('projectDetail.confirmDeleteStatus')
-      .replace('{{status}}', h.status)
-      .replace('{{date}}', h.businessDate);
-    if (!confirm(msg)) return;
-    this.snackBar.open(
-      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
-      this.i18n.translate('projectDetail.close'),
-      { duration: 4000 }
-    );
+  saveStatus(): void {
+    if (this.statusForm.invalid) return;
+    const v = this.statusForm.getRawValue();
+    this.saving.set(true);
+    this.projectService.changeStatus(this.project()!.id, {
+      status: v.status as ProjectStatus,
+      businessDate: v.businessDate!.toISOString().substring(0, 10),
+    }).subscribe({
+      next: p => { this.project.set(p); this.showStatusForm = false; this.saving.set(false); },
+      error: err => { this.errorMessage.set(err.error?.message ?? 'Erreur'); this.saving.set(false); },
+    });
   }
 
-  deletePmEntry(h: ProjectManagerHistoryEntry): void {
-    const msg = this.i18n.translate('projectDetail.confirmDeletePm')
-      .replace('{{pm}}', h.projectManager);
-    if (!confirm(msg)) return;
-    this.snackBar.open(
-      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
-      this.i18n.translate('projectDetail.close'),
-      { duration: 4000 }
-    );
+  // ── Project manager ───────────────────────────────────────────────────────
+
+  savePm(): void {
+    if (this.pmForm.invalid) return;
+    this.saving.set(true);
+    this.projectService.changeProjectManager(this.project()!.id, this.pmForm.value.projectManagerId!).subscribe({
+      next: p => { this.project.set(p); this.showPmForm = false; this.saving.set(false); },
+      error: err => { this.errorMessage.set(err.error?.message ?? 'Erreur'); this.saving.set(false); },
+    });
   }
 
-  deleteDueDateEntry(h: DueDateHistoryEntry): void {
-    const msg = this.i18n.translate('projectDetail.confirmDeleteDueDate')
-      .replace('{{date}}', h.dueDate);
-    if (!confirm(msg)) return;
-    this.snackBar.open(
-      this.i18n.translate('projectDetail.historyDeleteNotSupported'),
-      this.i18n.translate('projectDetail.close'),
-      { duration: 4000 }
-    );
+  // ── Due date ──────────────────────────────────────────────────────────────
+
+  saveDueDate(): void {
+    if (this.dueDateForm.invalid) return;
+    this.saving.set(true);
+    const d = this.dueDateForm.value.dueDate!.toISOString().substring(0, 10);
+    this.projectService.changeDueDate(this.project()!.id, d).subscribe({
+      next: p => { this.project.set(p); this.showDueDateForm = false; this.saving.set(false); },
+      error: err => { this.errorMessage.set(err.error?.message ?? 'Erreur'); this.saving.set(false); },
+    });
   }
 
   // ── Budget lines ──────────────────────────────────────────────────────────
 
-  openAddBudgetLine(): void {
-    const ref = this.dialog.open(BudgetLineFormComponent, { width: '480px', data: {} });
-    ref.afterClosed().subscribe(payload => {
-      if (!payload) return;
-      this.projectService.addBudgetLine(this.project.id, payload).subscribe({
-        next: p => { this.project = p; this.snack('projectDetail.budgetLineAdded'); },
-        error: err => this.snackError(err),
-      });
+  openBudgetLineDialog(existing?: BudgetLineResponse): void {
+    const data: BudgetLineDialogData = { projectId: this.project()!.id, existing };
+    const ref = this.dialog.open(BudgetLineFormComponent, { width: '480px', data });
+    ref.afterClosed().subscribe(result => { if (result) this.project.set(result); });
+  }
+
+  deleteBudgetLine(lineId: string): void {
+    if (!confirm('Supprimer cette ligne budgétaire ?')) return;
+    this.projectService.deleteBudgetLine(this.project()!.id, lineId).subscribe({
+      next: p => this.project.set(p),
+      error: err => this.errorMessage.set(err.error?.message ?? 'Erreur'),
     });
   }
 
-  openEditBudgetLine(line: BudgetLineEntry): void {
-    const ref = this.dialog.open(BudgetLineFormComponent, { width: '480px', data: { line } });
-    ref.afterClosed().subscribe(payload => {
-      if (!payload) return;
-      this.projectService.updateBudgetLine(this.project.id, line.id, payload).subscribe({
-        next: p => { this.project = p; this.snack('projectDetail.budgetLineUpdated'); },
-        error: err => this.snackError(err),
-      });
-    });
-  }
+  // ── Progression ───────────────────────────────────────────────────────────
 
-  deleteBudgetLine(line: BudgetLineEntry): void {
-    const msg = this.i18n.translate('projectDetail.confirmDeleteBudget')
-      .replace('{{amount}}', String(line.amount));
-    if (!confirm(msg)) return;
-    this.projectService.deleteBudgetLine(this.project.id, line.id).subscribe({
-      next: p => { this.project = p; this.snack('projectDetail.budgetLineDeleted'); },
-      error: err => this.snackError(err),
+  openProgressionDialog(): void {
+    const ref = this.dialog.open(ProgressionFormComponent, {
+      width: '420px',
+      data: this.project()!.id,
     });
+    ref.afterClosed().subscribe(result => { if (result) this.project.set(result); });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  private snack(key: string): void {
-    this.snackBar.open(
-      this.i18n.translate(key),
-      this.i18n.translate('projectDetail.close'),
-      { duration: 3000 }
-    );
-  }
+getStatusLabel(status: string): string {
+  return this.statusLabels[status as ProjectStatus] ?? status;
+}
 
-  private snackError(err: { error?: { message?: string } }): void {
-    this.snackBar.open(
-      err.error?.message ?? this.i18n.translate('projectDetail.error'),
-      this.i18n.translate('projectDetail.close'),
-      { duration: 4000 }
-    );
-  }
+statusColor(status: string): string {
+  const map: Record<ProjectStatus, string> = {
+    DRAFT: 'default', BIA: 'primary', PROJECT: 'accent',
+    CANCELED: 'warn', CLOSED: 'warn',
+  };
+  return map[status as ProjectStatus] ?? 'default';
+}
 
-  private pmIdByUsername(username: string): string | undefined {
-    return this.projectManagers.find(pm => pm.username === username)?.id;
-  }
+  back(): void { this.router.navigate(['/projects']); }
 }
