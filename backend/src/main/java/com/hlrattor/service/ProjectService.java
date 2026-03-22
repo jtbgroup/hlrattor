@@ -70,7 +70,7 @@ public class ProjectService {
         Project project = new Project();
         project.setName(dto.name());
         project.setReference(dto.reference());
-        project.setSciformaCode(dto.sciformaCode());
+        project.setImputationCode(dto.imputationCode());
         project.setPordBia(dto.pordBia());
         project.setPordProject(dto.pordProject());
         project.setCreatedBy(currentUser);
@@ -117,8 +117,8 @@ public class ProjectService {
         }
 
         // Both roles can update
-        if (dto.sciformaCode() != null)
-            project.setSciformaCode(dto.sciformaCode());
+        if (dto.imputationCode() != null)
+            project.setImputationCode(dto.imputationCode());
         if (dto.pordBia() != null)
             project.setPordBia(dto.pordBia());
         if (dto.pordProject() != null)
@@ -392,7 +392,7 @@ public class ProjectService {
                 .toList();
 
         return new ProjectDetailDto(id, project.getReference(), project.getName(),
-                project.getSciformaCode(), project.getPordBia(), project.getPordProject(),
+                project.getImputationCode(), project.getPordBia(), project.getPordProject(),
                 project.getCreatedBy().getUsername(), project.getCreatedAt(),
                 currentStatus, currentPm, currentDueDate, currentProgression, totalBudget,
                 statusHistory, pmHistory, dueDateHistory, budgetLines, progressionHistory);

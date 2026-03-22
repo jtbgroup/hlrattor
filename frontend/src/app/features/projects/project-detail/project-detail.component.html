@@ -37,7 +37,7 @@
           <dl class="info-grid">
             <dt>Référence</dt><dd>{{ p.reference }}</dd>
             <dt>Nom</dt><dd>{{ p.name }}</dd>
-            <dt>Code Sciforma</dt><dd>{{ p.sciformaCode }}</dd>
+            <dt>Code Imputation</dt><dd>{{ p.imputationCode }}</dd>
             <dt>PORD BIA</dt><dd>{{ p.pordBia ?? '—' }}</dd>
             <dt>PORD Projet</dt><dd>{{ p.pordProject ?? '—' }}</dd>
             <dt>Créé par</dt><dd>{{ p.createdBy }}</dd>
@@ -55,8 +55,8 @@
               </mat-form-field>
             }
             <mat-form-field appearance="outline">
-              <mat-label>Code Sciforma *</mat-label>
-              <input matInput formControlName="sciformaCode" />
+              <mat-label>Code Imputation *</mat-label>
+              <input matInput formControlName="imputationCode" />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>PORD BIA</mat-label>
@@ -124,8 +124,7 @@
         <table mat-table [dataSource]="p.statusHistory" class="history-table">
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Statut</th>
-            <td mat-cell *matCellDef="let r">{{ getStatusLabel(p.currentStatus) }}
-{{ getStatusLabel(r.status) }}</td>
+            <td mat-cell *matCellDef="let r">{{ getStatusLabel(r.status) }}</td>
           </ng-container>
           <ng-container matColumnDef="businessDate">
             <th mat-header-cell *matHeaderCellDef>Date métier</th>

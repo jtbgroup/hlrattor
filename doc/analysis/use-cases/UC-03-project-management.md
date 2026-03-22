@@ -2,7 +2,7 @@
 
 ## Summary
 
-Allows an ADMIN to create and manage projects. A project has a unique reference, a name, a Sciforma imputation code, two optional PORD references (BIA and Project phases), a status with full history, a project manager (with history), a due date (with history), a set of budget lines whose sum constitutes the total budget, and a progression history tracking the completion percentage over time.
+Allows an ADMIN to create and manage projects. A project has a unique reference, a name, an Imputation code, two optional PORD references (BIA and Project phases), a status with full history, a project manager (with history), a due date (with history), a set of budget lines whose sum constitutes the total budget, and a progression history tracking the completion percentage over time.
 
 ## Actors
 
@@ -19,7 +19,7 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 ## Main Flow — Create Project
 
 1. The ADMIN navigates to the Project Management area and clicks "Create project".
-2. The ADMIN fills in the required fields: `name`, `reference` (unique), `sciformaCode`, and selects a `projectManager` from the list of users with role PROJECT_MANAGER.
+2. The ADMIN fills in the required fields: `name`, `reference` (unique), `imputationCode`, and selects a `projectManager` from the list of users with role PROJECT_MANAGER.
 3. The ADMIN optionally fills in: `pordBia`, `pordProject`, initial status and its date.
 4. The backend validates the input (reference uniqueness, valid project manager role).
 5. The backend persists the project with:
@@ -40,7 +40,7 @@ Allows an ADMIN to create and manage projects. A project has a unique reference,
 |---|---|---|
 | Name | ✅ | ❌ |
 | Reference | ✅ | ❌ |
-| Sciforma code | ✅ | ✅ |
+| Imputation code | ✅ | ✅ |
 | PORD BIA | ✅ | ✅ |
 | PORD Project | ✅ | ✅ |
 | Project manager | ✅ | ❌ |

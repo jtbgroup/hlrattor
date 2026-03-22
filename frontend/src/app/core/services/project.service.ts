@@ -61,7 +61,7 @@ export interface ProgressionResponse {
 }
 
 export interface ProjectDetail extends ProjectSummary {
-  sciformaCode: string;
+  imputationCode: string;
   pordBia: string | null;
   pordProject: string | null;
   createdBy: string;
@@ -76,7 +76,7 @@ export interface ProjectDetail extends ProjectSummary {
 export interface CreateProjectPayload {
   name: string;
   reference: string;
-  sciformaCode: string;
+  imputationCode: string;
   pordBia?: string;
   pordProject?: string;
   projectManagerId: string;
@@ -87,7 +87,7 @@ export interface CreateProjectPayload {
 export interface UpdateProjectPayload {
   name?: string;
   reference?: string;
-  sciformaCode?: string;
+  imputationCode?: string;
   pordBia?: string;
   pordProject?: string;
 }
@@ -108,52 +108,54 @@ export interface ProgressionPayload {
   progressionDate: string;
 }
 
+const OPT = { withCredentials: true };
+
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiBaseUrl}/api/projects`;
 
   getProjects(): Observable<ProjectSummary[]> {
-    return this.http.get<ProjectSummary[]>(this.base);
+    return this.http.get<ProjectSummary[]>(this.base, OPT);
   }
 
   getProject(id: string): Observable<ProjectDetail> {
-    return this.http.get<ProjectDetail>(`${this.base}/${id}`);
+    return this.http.get<ProjectDetail>(`${this.base}/${id}`, OPT);
   }
 
   createProject(payload: CreateProjectPayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(this.base, payload);
+    return this.http.post<ProjectDetail>(this.base, payload, OPT);
   }
 
   updateProject(id: string, payload: UpdateProjectPayload): Observable<ProjectDetail> {
-    return this.http.put<ProjectDetail>(`${this.base}/${id}`, payload);
+    return this.http.put<ProjectDetail>(`${this.base}/${id}`, payload, OPT);
   }
 
   changeStatus(id: string, payload: StatusChangePayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/status`, payload);
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/status`, payload, OPT);
   }
 
   changeProjectManager(id: string, projectManagerId: string): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/project-manager`, { projectManagerId });
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/project-manager`, { projectManagerId }, OPT);
   }
 
   changeDueDate(id: string, dueDate: string): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/due-date`, { dueDate });
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/due-date`, { dueDate }, OPT);
   }
 
   addBudgetLine(id: string, payload: BudgetLinePayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/budget-lines`, payload);
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/budget-lines`, payload, OPT);
   }
 
   updateBudgetLine(id: string, lineId: string, payload: BudgetLinePayload): Observable<ProjectDetail> {
-    return this.http.put<ProjectDetail>(`${this.base}/${id}/budget-lines/${lineId}`, payload);
+    return this.http.put<ProjectDetail>(`${this.base}/${id}/budget-lines/${lineId}`, payload, OPT);
   }
 
   deleteBudgetLine(id: string, lineId: string): Observable<ProjectDetail> {
-    return this.http.delete<ProjectDetail>(`${this.base}/${id}/budget-lines/${lineId}`);
+    return this.http.delete<ProjectDetail>(`${this.base}/${id}/budget-lines/${lineId}`, OPT);
   }
 
   addProgression(id: string, payload: ProgressionPayload): Observable<ProjectDetail> {
-    return this.http.post<ProjectDetail>(`${this.base}/${id}/progressions`, payload);
+    return this.http.post<ProjectDetail>(`${this.base}/${id}/progressions`, payload, OPT);
   }
 }

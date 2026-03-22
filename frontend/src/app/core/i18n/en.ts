@@ -92,7 +92,7 @@ export const en = {
     titleEdit: 'Edit Project',
     draftNotice: 'Every new project starts with status DRAFT, dated today.',
     fieldName: 'Name',
-    fieldSciformaCode: 'Sciforma Code',
+    fieldImputationCode: 'Imputation Code',
     fieldPordBia: 'PORD BIA',
     fieldPordProject: 'PORD Project',
     fieldProjectManager: 'Project Manager',
@@ -119,7 +119,7 @@ export const en = {
     // Fields
     fieldReference: 'Reference',
     fieldName: 'Name',
-    fieldSciformaCode: 'Sciforma Code',
+    fieldImputationCode: 'Imputation Code',
     fieldPordBia: 'PORD BIA',
     fieldPordProject: 'PORD Project',
     fieldStatus: 'Status',

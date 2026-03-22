@@ -14,7 +14,7 @@ So that it can be tracked and managed in the application.
 
 - Given I am logged in as ADMIN
   - When I navigate to the Project Management page and click "Create project"
-  - Then a form is displayed with the required fields: name, reference, Sciforma code, project manager, initial status, and status date
+  - Then a form is displayed with the required fields: name, reference, imputation code, project manager, initial status, and status date
 
 - Given I fill in all required fields with valid data and submit
   - Then the project is created

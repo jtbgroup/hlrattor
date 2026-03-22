@@ -9,7 +9,7 @@ import java.util.UUID;
 public record CreateProjectDto(
                 @NotBlank String name,
                 @NotBlank String reference,
-                @NotBlank String sciformaCode,
+                @NotBlank String imputationCode,
                 String pordBia,
                 String pordProject,
                 @NotNull UUID projectManagerId,

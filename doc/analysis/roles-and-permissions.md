@@ -48,7 +48,7 @@ A PROJECT_MANAGER cannot manage users or create projects.
 | View project detail | ✅ | ✅ | ✅ |
 | Create project | ✅ | ❌ | ❌ |
 | Edit name / reference | ✅ | ❌ | ❌ |
-| Edit Sciforma code / PORD | ✅ | ✅ | ❌ |
+| Edit Imputation code / PORD | ✅ | ✅ | ❌ |
 | Change project manager | ✅ | ❌ | ❌ |
 | Change status | ✅ | ✅ | ❌ |
 | Change due date | ✅ | ✅ | ❌ |

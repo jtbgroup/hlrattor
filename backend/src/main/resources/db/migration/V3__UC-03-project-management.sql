@@ -4,7 +4,7 @@ CREATE TABLE project (
     id            UUID         PRIMARY KEY,
     name          VARCHAR(255) NOT NULL,
     reference     VARCHAR(100) NOT NULL UNIQUE,
-    sciforma_code VARCHAR(100) NOT NULL,
+    imputation_code VARCHAR(100) NOT NULL,
     pord_bia      VARCHAR(255),
     pord_project  VARCHAR(255),
     created_by    UUID         NOT NULL REFERENCES app_user(id),

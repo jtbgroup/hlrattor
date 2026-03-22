@@ -33,7 +33,7 @@ public final class ProjectDtos {
             UUID id,
             String reference,
             String name,
-            String sciformaCode,
+            String imputationCode,
             String pordBia,
             String pordProject,
             String createdBy,
@@ -55,7 +55,7 @@ public final class ProjectDtos {
     public record CreateProjectDto(
             @NotBlank String name,
             @NotBlank String reference,
-            @NotBlank String sciformaCode,
+            @NotBlank String imputationCode,
             String pordBia,
             String pordProject,
             @NotNull UUID projectManagerId,
@@ -66,7 +66,7 @@ public final class ProjectDtos {
     public record UpdateProjectDto(
             String name,
             String reference,
-            String sciformaCode,
+            String imputationCode,
             String pordBia,
             String pordProject
     ) {}

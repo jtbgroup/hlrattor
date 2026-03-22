@@ -89,7 +89,7 @@ export class ProjectDetailComponent implements OnInit {
   headerForm = this.fb.group({
     name: ['', Validators.required],
     reference: ['', Validators.required],
-    sciformaCode: ['', Validators.required],
+    imputationCode: ['', Validators.required],
     pordBia: [''],
     pordProject: [''],
   });
@@ -132,7 +132,7 @@ export class ProjectDetailComponent implements OnInit {
     this.headerForm.patchValue({
       name: p.name,
       reference: p.reference,
-      sciformaCode: p.sciformaCode,
+      imputationCode: p.imputationCode,
       pordBia: p.pordBia ?? '',
       pordProject: p.pordProject ?? '',
     });
@@ -147,7 +147,7 @@ export class ProjectDetailComponent implements OnInit {
     this.projectService.updateProject(this.project()!.id, {
       name: this.isAdmin ? v.name! : undefined,
       reference: this.isAdmin ? v.reference! : undefined,
-      sciformaCode: v.sciformaCode!,
+      imputationCode: v.imputationCode!,
       pordBia: v.pordBia || undefined,
       pordProject: v.pordProject || undefined,
     }).subscribe({

@@ -14,11 +14,11 @@ So that the project data stays accurate and up to date.
 
 - Given I am logged in as ADMIN
   - When I navigate to the project detail page
-  - Then I can edit all fields: name, reference, Sciforma code, PORD BIA, PORD Project, project manager, status, due date, and budget lines
+  - Then I can edit all fields: name, reference, imputation code, PORD BIA, PORD Project, project manager, status, due date, and budget lines
 
 - Given I am logged in as the PROJECT_MANAGER assigned to this project
   - When I navigate to the project detail page
-  - Then I can edit: Sciforma code, PORD BIA, PORD Project, status, due date, and budget lines
+  - Then I can edit: imputation code, PORD BIA, PORD Project, status, due date, and budget lines
   - And the name, reference, and project manager fields are read-only
 
 - Given I am a PROJECT_MANAGER not assigned to this project

@@ -1,7 +1,9 @@
+@use 'styles/variables' as *;
+
+// ── Page header ───────────────────────────────────────────────────────────────
+
 .project-list-container {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
+  padding: 0;
 }
 
 .list-header {
@@ -9,13 +11,16 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
-
-  h1 {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 500;
-  }
 }
+
+.page-title {
+  margin: 0;
+  font-size: $font-size-2xl;
+  font-weight: $font-weight-bold;
+  color: $color-brand-deep;
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
 
 .filters {
   display: flex;
@@ -27,27 +32,116 @@
   }
 }
 
-.full-width {
+// ── Table card ────────────────────────────────────────────────────────────────
+
+.table-card {
+  background: $color-bg-white;
+  border-radius: $border-radius-lg;
+  border: 1px solid $table-card-border;
+  box-shadow: $shadow-card-md;
+  overflow: hidden;
+}
+
+.project-table {
   width: 100%;
+
+  .mat-mdc-header-row {
+    background: $table-header-bg;
+  }
+
+  .mat-mdc-header-cell {
+    color: $table-header-color;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-xxs;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 2px solid $table-header-border;
+  }
+
+  .mat-mdc-row {
+    transition: background 0.12s ease;
+
+    &:hover {
+      background: $table-row-hover;
+    }
+  }
+
+  .mat-mdc-cell {
+    border-bottom-color: $table-cell-border;
+    color: $color-text;
+    font-size: $font-size-sm;
+  }
 }
 
 .clickable-row {
   cursor: pointer;
-  transition: background-color 0.15s;
+}
 
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+// ── Status badges ─────────────────────────────────────────────────────────────
+
+.status-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: $font-weight-bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: $border-radius-pill;
+  padding: 3px 10px;
+
+  &.draft {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &.bia {
+    background: #e8eaf6;
+    color: $color-brand-deep;
+  }
+
+  &.project {
+    background: $color-success-bg;
+    color: $color-success-text;
+  }
+
+  &.canceled {
+    background: $color-warning-bg;
+    color: $color-warning-text;
+  }
+
+  &.closed {
+    background: rgba(0, 0, 0, 0.06);
+    color: rgba(0, 0, 0, 0.5);
   }
 }
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: rgba(0, 0, 0, 0.4);
+
+  .empty-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+    opacity: 0.35;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// ── Spinner ───────────────────────────────────────────────────────────────────
 
 .spinner-wrapper {
   display: flex;
   justify-content: center;
   padding: 48px;
-}
-
-.no-data {
-  text-align: center;
-  padding: 32px;
-  color: rgba(0, 0, 0, 0.54);
 }

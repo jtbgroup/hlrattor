@@ -8,12 +8,12 @@
 
   <mat-form-field appearance="outline" class="full">
     <mat-label>Progression *</mat-label>
-    <input matInput type="number" min="0" max="100" step="1" formControlName="value" />
+    <input matInput type="number" min="0" max="100" step="1" formControlName="progressionValue" />
     <mat-hint>Valeur en pourcentage (0–100)</mat-hint>
-    @if (form.get('value')?.hasError('required') && form.get('value')?.touched) {
+    @if (form.get('progressionValue')?.hasError('required') && form.get('progressionValue')?.touched) {
       <mat-error>La progression est obligatoire.</mat-error>
     }
-    @if ((form.get('value')?.hasError('min') || form.get('value')?.hasError('max')) && form.get('value')?.touched) {
+    @if ((form.get('progressionValue')?.hasError('min') || form.get('progressionValue')?.hasError('max')) && form.get('progressionValue')?.touched) {
       <mat-error>La progression doit être comprise entre 0 et 100.</mat-error>
     }
   </mat-form-field>

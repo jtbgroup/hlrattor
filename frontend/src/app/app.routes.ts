@@ -9,7 +9,6 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent)
   },
   {
-    // Shell layout: header + router-outlet for all protected pages
     path: '',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -47,8 +46,13 @@ export const routes: Routes = [
       },
       {
         path: 'projects',
-        loadChildren: () =>
-          import('./features/projects/projects.routes').then(m => m.PROJECT_ROUTES)
+        loadComponent: () =>
+          import('./features/projects/project-list/project-list.component').then(m => m.ProjectListComponent)
+      },
+      {
+        path: 'projects/:id',
+        loadComponent: () =>
+          import('./features/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent)
       }
     ]
   },

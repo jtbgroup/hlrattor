@@ -24,10 +24,10 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Code Sciforma *</mat-label>
-      <input matInput formControlName="sciformaCode" />
-      @if (form.get('sciformaCode')?.hasError('required') && form.get('sciformaCode')?.touched) {
-        <mat-error>Le code Sciforma est obligatoire.</mat-error>
+      <mat-label>Code Imputation *</mat-label>
+      <input matInput formControlName="imputationCode" />
+      @if (form.get('imputationCode')?.hasError('required') && form.get('imputationCode')?.touched) {
+        <mat-error>Le code d'imputation est obligatoire.</mat-error>
       }
     </mat-form-field>
 

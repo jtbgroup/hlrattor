@@ -55,7 +55,7 @@ export interface ProjectDetail {
   id: string;
   reference: string;
   name: string;
-  sciformaCode: string;
+  imputationCode: string;
   pordBia: string | null;
   pordProject: string | null;
   createdBy: string;
@@ -73,7 +73,7 @@ export interface ProjectDetail {
 export interface CreateProjectPayload {
   name: string;
   reference: string;
-  sciformaCode: string;
+  imputationCode: string;
   pordBia?: string;
   pordProject?: string;
   projectManagerId: string;
@@ -84,7 +84,7 @@ export interface CreateProjectPayload {
 export interface UpdateProjectPayload {
   name?: string;
   reference?: string;
-  sciformaCode?: string;
+  imputationCode?: string;
   pordBia?: string;
   pordProject?: string;
 }

@@ -94,7 +94,7 @@ export const fr: TranslationKeys = {
     titleEdit: 'Modifier le projet',
     draftNotice: "Tout nouveau projet démarre avec le statut BROUILLON, daté d'aujourd'hui.",
     fieldName: 'Nom',
-    fieldSciformaCode: 'Code Sciforma',
+    fieldImputationCode: 'Code d\'imputation',
     fieldPordBia: 'PORD BIA',
     fieldPordProject: 'PORD Projet',
     fieldProjectManager: 'Chef de projet',
@@ -121,7 +121,7 @@ export const fr: TranslationKeys = {
     // Fields
     fieldReference: 'Référence',
     fieldName: 'Nom',
-    fieldSciformaCode: 'Code Sciforma',
+    fieldImputationCode: 'Code d\'imputation',
     fieldPordBia: 'PORD BIA',
     fieldPordProject: 'PORD Projet',
     fieldStatus: 'Statut',

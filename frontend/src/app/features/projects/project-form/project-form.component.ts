@@ -44,7 +44,7 @@ export class ProjectFormComponent implements OnInit {
   form = this.fb.group({
     name: ['', Validators.required],
     reference: ['', Validators.required],
-    sciformaCode: ['', Validators.required],
+    imputationCode: ['', Validators.required],
     pordBia: [''],
     pordProject: [''],
     projectManagerId: ['', Validators.required],
@@ -67,7 +67,7 @@ export class ProjectFormComponent implements OnInit {
     this.projectService.createProject({
       name: v.name!,
       reference: v.reference!,
-      sciformaCode: v.sciformaCode!,
+      imputationCode: v.imputationCode!,
       pordBia: v.pordBia || undefined,
       pordProject: v.pordProject || undefined,
       projectManagerId: v.projectManagerId!,

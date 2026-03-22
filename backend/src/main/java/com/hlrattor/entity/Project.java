@@ -21,8 +21,8 @@ public class Project {
     @Column(nullable = false, unique = true)
     private String reference;
 
-    @Column(name = "sciforma_code", nullable = false)
-    private String sciformaCode;
+    @Column(name = "imputation_code", nullable = false)
+    private String imputationCode;
 
     @Column(name = "pord_bia")
     private String pordBia;
@@ -52,8 +52,8 @@ public class Project {
     public String getReference() { return reference; }
     public void setReference(String reference) { this.reference = reference; }
 
-    public String getSciformaCode() { return sciformaCode; }
-    public void setSciformaCode(String sciformaCode) { this.sciformaCode = sciformaCode; }
+    public String getImputationCode() { return imputationCode; }
+    public void setImputationCode(String imputationCode) { this.imputationCode = imputationCode; }
 
     public String getPordBia() { return pordBia; }
     public void setPordBia(String pordBia) { this.pordBia = pordBia; }

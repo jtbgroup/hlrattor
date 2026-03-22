@@ -11,7 +11,7 @@ public record ProjectDetailDto(
                 UUID id,
                 String reference,
                 String name,
-                String sciformaCode,
+                String imputationCode,
                 String pordBia,
                 String pordProject,
                 String createdBy,

@@ -2,7 +2,7 @@
   {
     "name": "Refonte portail RH",
     "reference": "PRJ-2024-001",
-    "sciformaCode": "SC-RH-2024",
+    "imputationCode": "SC-RH-2024",
     "pordBia": "PORD-BIA-001",
     "pordProject": "PORD-PRJ-001",
     "projectManagerUsername": "bob.dupont",
@@ -12,7 +12,7 @@
   {
     "name": "Migration infrastructure cloud",
     "reference": "PRJ-2024-002",
-    "sciformaCode": "SC-INFRA-2024",
+    "imputationCode": "SC-INFRA-2024",
     "pordBia": "PORD-BIA-002",
     "pordProject": null,
     "projectManagerUsername": "claire.leroy",
@@ -22,7 +22,7 @@
   {
     "name": "Déploiement CRM Salesforce",
     "reference": "PRJ-2024-003",
-    "sciformaCode": "SC-CRM-2024",
+    "imputationCode": "SC-CRM-2024",
     "pordBia": null,
     "pordProject": "PORD-PRJ-003",
     "projectManagerUsername": "bob.dupont",
@@ -32,7 +32,7 @@
   {
     "name": "Audit sécurité SI",
     "reference": "PRJ-2023-010",
-    "sciformaCode": "SC-SEC-2023",
+    "imputationCode": "SC-SEC-2023",
     "pordBia": "PORD-BIA-010",
     "pordProject": "PORD-PRJ-010",
     "projectManagerUsername": "claire.leroy",
@@ -42,7 +42,7 @@
   {
     "name": "Plateforme e-learning interne",
     "reference": "PRJ-2024-004",
-    "sciformaCode": "SC-ELEARN-2024",
+    "imputationCode": "SC-ELEARN-2024",
     "pordBia": null,
     "pordProject": null,
     "projectManagerUsername": "emma.dubois",
@@ -52,7 +52,7 @@
   {
     "name": "Modernisation ERP financier",
     "reference": "PRJ-2024-005",
-    "sciformaCode": "SC-ERP-2024",
+    "imputationCode": "SC-ERP-2024",
     "pordBia": "PORD-BIA-005",
     "pordProject": "PORD-PRJ-005",
     "projectManagerUsername": "bob.dupont",

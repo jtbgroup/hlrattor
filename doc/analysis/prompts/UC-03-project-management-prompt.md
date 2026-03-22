@@ -32,7 +32,7 @@ This prompt is used to generate all the code and resources required to implement
 | id | UUID | PK |
 | name | String | Required |
 | reference | String | Required, unique |
-| sciformaCode | String | Required |
+| imputationCode | String | Required |
 | pordBia | String | Optional, free text |
 | pordProject | String | Optional, free text |
 | createdBy | AppUser | Audit |
@@ -132,14 +132,14 @@ Create a controller and service exposing the following endpoints under `/api/pro
 - `GET /api/projects` (authenticated): list all projects with current status, current project manager, current due date, current progression, and total budget.
 - `GET /api/projects/{id}` (authenticated): get full project detail including all history entries, budget lines, and progression history.
 - `POST /api/projects` (ADMIN only): create a new project.
-  - Body: `{ name, reference, sciformaCode, pordBia?, pordProject?, projectManagerId, initialStatus, statusDate }`.
+  - Body: `{ name, reference, imputationCode, pordBia?, pordProject?, projectManagerId, initialStatus, statusDate }`.
   - Validate reference uniqueness.
   - Validate projectManagerId refers to an enabled user with role PROJECT_MANAGER.
   - Create initial `ProjectStatusHistory` and `ProjectManagerHistory` entries.
   - Audit creation.
 - `PUT /api/projects/{id}` (ADMIN or assigned PROJECT_MANAGER): update project fields.
-  - ADMIN can update: name, reference, sciformaCode, pordBia, pordProject.
-  - PROJECT_MANAGER (assigned) can update: sciformaCode, pordBia, pordProject.
+  - ADMIN can update: name, reference, imputationCode, pordBia, pordProject.
+  - PROJECT_MANAGER (assigned) can update: imputationCode, pordBia, pordProject.
   - Reject if project is CLOSED or CANCELED.
   - Validate reference uniqueness if changed.
 
@@ -209,8 +209,8 @@ Create a `ProjectService` encapsulating:
 
 - `ProjectSummaryDto`: id, reference, name, currentStatus, currentProjectManager (username), currentDueDate, currentProgression (Integer, nullable), totalBudget.
 - `ProjectDetailDto`: all fields + full history lists + budget lines + progression history.
-- `CreateProjectDto`: name, reference, sciformaCode, pordBia, pordProject, projectManagerId, initialStatus, statusDate.
-- `UpdateProjectDto`: name, reference, sciformaCode, pordBia, pordProject (role-filtered server-side).
+- `CreateProjectDto`: name, reference, imputationCode, pordBia, pordProject, projectManagerId, initialStatus, statusDate.
+- `UpdateProjectDto`: name, reference, imputationCode, pordBia, pordProject (role-filtered server-side).
 - `StatusChangeDto`: status, businessDate.
 - `ProjectManagerChangeDto`: projectManagerId.
 - `DueDateChangeDto`: dueDate.
@@ -239,7 +239,7 @@ CREATE TABLE project (
     id            UUID         PRIMARY KEY,
     name          VARCHAR(255) NOT NULL,
     reference     VARCHAR(100) NOT NULL UNIQUE,
-    sciforma_code VARCHAR(100) NOT NULL,
+    imputation_code VARCHAR(100) NOT NULL,
     pord_bia      VARCHAR(255),
     pord_project  VARCHAR(255),
     created_by    UUID         NOT NULL REFERENCES app_user(id),
@@ -323,7 +323,7 @@ Create a lazy-loaded feature module at route `/projects`.
 ##### Project Detail Page (`/projects/:id`)
 
 Sections:
-1. **En-tête**: référence, nom, code Sciforma, PORD BIA, PORD Projet — editable per role rules.
+1. **En-tête**: référence, nom, code Imputation, PORD BIA, PORD Projet — editable per role rules.
 2. **Statut**: current status chip + "Modifier le statut" action (opens inline form or dialog: statut select + sélecteur de date). Full status history table below.
 3. **Chef de projet**: current project manager display + "Modifier le chef de projet" button (ADMIN only). Full PM history table below.
 4. **Échéance**: current due date + "Modifier l'échéance" action. Full due date history table below.
@@ -335,7 +335,7 @@ Sections:
 All labels and errors in French. Required fields marked with `*` (single asterisk). Fields:
 - Nom `*`
 - Référence `*`
-- Code Sciforma `*`
+- Code Imputation `*`
 - PORD BIA (optional)
 - PORD Projet (optional)
 - Chef de projet `*` (select, filtered to PROJECT_MANAGER role)

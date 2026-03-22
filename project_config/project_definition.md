@@ -6,9 +6,11 @@ The objective of this application is to generate Highlight Reports as project pr
 
 https://github.com/jtbgroup/hlrattor.git
 
+# Backen package name:
+
+com.hlrattor
+
 # Users & Roles
 
 - ADMIN: will be able to create projects and manage the plateform
 - PROJECT_MANAGER: will be able to record information about his project
-
-# Entities
